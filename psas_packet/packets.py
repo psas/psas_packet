@@ -20,11 +20,14 @@ class Packet(object):
     a specific data source.
     """
 
+    # This header is consistant across messages
+    header = struct.Struct('!4sHLH')
+
     def __init__(self, definition):
         self.name = definition['name']
         self.fourcc = definition['fourcc']
 
-        # pre compute struct for fixed size packets
+        # Pre-compute struct for fixed size packets
         self.members = {}
         if definition['size'] == "Fixed":
             struct_string = definition['endianness']
@@ -34,34 +37,42 @@ class Packet(object):
             self.struct = struct.Struct(struct_string)
 
     def __repr__(self):
-        return "{0} packet [{1}]".format(self.name, self.fourcc)
+        return "{0} packet [{1}]".format(self.name, self.fourcc.decode("utf-8"))
 
-    def encode(self, data):
+    def encode(self, data, timestamp=None):
         """Encode a set of data into binary
 
         :param dict data: A dictionary of values to encode
-        :returns: binary ecoded data
+        :param int timestamp: Time since boot in nanoseconds
+        :returns: Binary ecoded data
 
         Uses the struct package to encode data. Objects should match keys in
         the members list.
         """
 
+        # Make header if given timestamp
+        head = b''
+        if timestamp is not None:
+            timestamp_hi = (timestamp >> 32) & 0xffff
+            timestamp_lo = timestamp & 0xffffffff
+            head = self.header.pack(self.fourcc, timestamp_hi, timestamp_lo, self.struct.size)
+
         # Initilize as zeros
         values = [0]*len(self.members)
 
-        # lookup corisponding metadata
+        # Lookup corisponding metadata
         for key, value in data.items():
             m = self.members[key]
             units = m['units']
             v = (value - units.get('bias', 0)) / units.get('scaleby', 1)
             values[m['loc']] = Packable(v)
 
-        return self.struct.pack(*values)
+        return head + self.struct.pack(*values)
 
 
 ADIS = Packet({
-    'name': "ADIS",
-    'fourcc': "ADIS",
+    'name': "ADIS16405",
+    'fourcc': b'ADIS',
     'size': "Fixed",
     'endianness': '!',
     'members': [
