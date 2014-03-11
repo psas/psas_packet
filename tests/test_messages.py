@@ -89,7 +89,7 @@ typedef struct {
 	uint8_t  timestamp[6];
 	uint16_t data_length;
 	ADIS16405Data data;
-} __attribute__((packed)) ADIS16405Message;
+} __attribute__((packed)) ADISMessage;
 """
 
         self.assertEqual(messages.ADIS.typedef(), code)

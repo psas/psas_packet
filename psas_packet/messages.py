@@ -11,7 +11,7 @@ class Packable(float):
 
 class MessageSizeError(Exception):
     """Raised when the byte str to be unpacked does not match the expected
-    size for this type. Check your message bounderies, or maybe you've
+    size for this type. Check your message boundaries, or maybe you've
     reached EOF?
 
     :param int expected: correct size
@@ -35,7 +35,7 @@ class Message(object):
     a specific data source.
     """
 
-    # This header is consistant across messages
+    # This header is consistent across messages
     header = struct.Struct('!4sHLH')
 
     def __init__(self, definition):
@@ -74,10 +74,10 @@ class Message(object):
             timestamp_lo = timestamp & 0xffffffff
             head = self.header.pack(self.fourcc, timestamp_hi, timestamp_lo, self.struct.size)
 
-        # Initilize as zeros
+        # Initialize as zeros
         values = [0] * len(self.members)
 
-        # Lookup corisponding metadata
+        # Lookup corresponding metadata
         for key, value in data.items():
             m = self.members[key]
             units = m['units']
@@ -87,7 +87,7 @@ class Message(object):
         return head + self.struct.pack(*values)
 
     def decode(self, raw):
-        """Decode a singel message body (the data lines). Header info and
+        """Decode a single message body (the data lines). Header info and
         message boundaries are solved in network
 
         :param bytestr raw: Raw string of bytes the length of
@@ -120,8 +120,8 @@ typedef struct {{\n""".format(self.name)
 \tchar     ID[4];
 \tuint8_t  timestamp[6];
 \tuint16_t data_length;
-\t{0}Data data;
-}} __attribute__((packed)) {0}Message;\n""".format(self.name)
+\t{1}Data data;
+}} __attribute__((packed)) {0}Message;\n""".format(self.fourcc.decode("utf-8"), self.name)
 
         return typestruct
 
