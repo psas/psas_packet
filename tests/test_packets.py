@@ -54,7 +54,7 @@ class TestPackets(unittest.TestCase):
             'Aux_ADC': 0,
         }
         t = 123456
-        expect  = b'ADIS' + b'\x00\x00\x00\x01\xe2@' + b'\x00\x18'
+        expect = b'ADIS' + b'\x00\x00\x00\x01\xe2@' + b'\x00\x18'
         expect += b'\x08\x13\x00\x00\x00\x00\x00\x14\xfe\xda\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\xff\xdd\x00\x00'
         self.assertEqual(packets.ADIS.encode(data, timestamp=t), expect)
 
@@ -89,8 +89,6 @@ typedef struct {
 """
 
         self.assertEqual(packets.ADIS.typedef(), code)
-
-
 
     def tearDown(self):
         pass

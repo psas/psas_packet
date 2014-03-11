@@ -38,7 +38,6 @@ class Packet(object):
                 struct_string += member['stype']
             self.struct = struct.Struct(struct_string)
 
-
     def __repr__(self):
         return "{0} packet [{1}]".format(self.name, self.fourcc.decode("utf-8"))
 
@@ -61,7 +60,7 @@ class Packet(object):
             head = self.header.pack(self.fourcc, timestamp_hi, timestamp_lo, self.struct.size)
 
         # Initilize as zeros
-        values = [0]*len(self.members)
+        values = [0] * len(self.members)
 
         # Lookup corisponding metadata
         for key, value in data.items():
@@ -91,12 +90,12 @@ typedef struct {{\n""".format(self.name)
         typestruct += "}} __attribute__((packed)) {0}Data;\n".format(self.name)
 
         typestruct += """\ntypedef struct {{
-	char     ID[4];
-	uint8_t  timestamp[6];
-	uint16_t data_length;
-	{0}Data data;
+\tchar     ID[4];
+\tuint8_t  timestamp[6];
+\tuint16_t data_length;
+\t{0}Data data;
 }} __attribute__((packed)) {0}Message;\n""".format(self.name)
-        
+
         return typestruct
 
 
