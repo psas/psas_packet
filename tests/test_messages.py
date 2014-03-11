@@ -66,6 +66,29 @@ class TestMessages(unittest.TestCase):
         raw = b'\x08\x13\x00\x00\x00\x00\x00\x14\xfe\xda\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\xff\xdd\x00\x00\x00'
         self.assertRaises(messages.MessageSizeError, messages.ADIS.decode, raw)
 
+    def test_decode(self):
+        expect = {
+            'VCC': 5.0,
+            'Gyro_X': 1.0,
+            'Gyro_Y': 0,
+            'Gyro_Z': 0,
+            'Acc_X': 100.0,
+            'Acc_Y': 0,
+            'Acc_Z': 0,
+            'Magn_X': 0,
+            'Magn_Y': 0,
+            'Magn_Z': 0,
+            'Temp': 25,
+            'Aux_ADC': 0,
+        }
+
+        raw = b'\x08\x13\x00\x14\x00\x00\x00\x00\x0b\xbb\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00'
+
+        output = messages.ADIS.decode(raw)
+        self.assertEqual(len(expect), len(output))
+
+        for item, value in output.items():
+            self.assertAlmostEqual(expect[item], value, places=2)
 
     def test_typedef(self):
 

@@ -43,14 +43,14 @@ class Message(object):
         self.fourcc = definition['fourcc']
 
         # Pre-compute struct for fixed size packets
-        self.members = {}
-        self.cdefs = []
+        self.member_dict = {}
+        self.member_list = []
         if definition['size'] == "Fixed":
             struct_string = definition['endianness']
-            for i, member in enumerate(definition['members']):
-                self.members[member['key']] = {'loc': i, 'units': member['units']}
-                self.cdefs.append({'key': member['key'].lower(), 'type': member['ctype']})
-                struct_string += member['stype']
+            for i, m in enumerate(definition['members']):
+                self.member_dict[m['key']] = {'i': i, 'units': m['units']}
+                self.member_list.append(m)
+                struct_string += m['stype']
             self.struct = struct.Struct(struct_string)
 
     def __repr__(self):
@@ -75,14 +75,14 @@ class Message(object):
             head = self.header.pack(self.fourcc, timestamp_hi, timestamp_lo, self.struct.size)
 
         # Initialize as zeros
-        values = [0] * len(self.members)
+        values = [0] * len(self.member_list)
 
         # Lookup corresponding metadata
         for key, value in data.items():
-            m = self.members[key]
+            m = self.member_dict[key]
             units = m['units']
             v = (value - units.get('bias', 0)) / units.get('scaleby', 1)
-            values[m['loc']] = Packable(v)
+            values[m['i']] = Packable(v)
 
         return head + self.struct.pack(*values)
 
@@ -98,6 +98,19 @@ class Message(object):
             raise(MessageSizeError(self.struct.size, len(raw)))
             return
 
+        unpack = self.struct.unpack(raw)
+
+        values = {}
+        for i, v in enumerate(unpack):
+            m = self.member_list[i]
+            units = m['units']
+            v = (v * units.get('scaleby', 1)) + units.get('bias', 0)
+
+            values[m['key']] = v
+
+        # Return dictionary instead of list
+        return values
+
     def typedef(self):
         """Autogen c style typedef structs
 
@@ -111,8 +124,10 @@ class Message(object):
 typedef struct {{\n""".format(self.name)
 
         # data
-        for line in self.cdefs:
-            typestruct += "\t{0} {1}_{2};\n".format(line['type'], self.fourcc.decode("utf-8").lower(), line['key'])
+        for line in self.member_list:
+            typestruct += "\t{0} {1}_{2};\n".format(line['ctype'],
+                                                    self.fourcc.decode("utf-8").lower(),
+                                                    line['key'].lower())
 
         typestruct += "}} __attribute__((packed)) {0}Data;\n".format(self.name)
 
