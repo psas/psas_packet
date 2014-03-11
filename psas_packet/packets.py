@@ -29,12 +29,15 @@ class Packet(object):
 
         # Pre-compute struct for fixed size packets
         self.members = {}
+        self.cdefs = []
         if definition['size'] == "Fixed":
             struct_string = definition['endianness']
             for i, member in enumerate(definition['members']):
                 self.members[member['key']] = {'loc': i, 'units': member['units']}
-                struct_string += member['type']
+                self.cdefs.append({'key': member['key'].lower(), 'type': member['ctype']})
+                struct_string += member['stype']
             self.struct = struct.Struct(struct_string)
+
 
     def __repr__(self):
         return "{0} packet [{1}]".format(self.name, self.fourcc.decode("utf-8"))
@@ -69,6 +72,33 @@ class Packet(object):
 
         return head + self.struct.pack(*values)
 
+    def typedef(self):
+        """Autogen c style typedef structs
+
+        :returns: String c code for the data and header for this packet
+        """
+
+        # Header comment
+        typestruct = """/*! \\typedef
+ * {0} data
+ */
+typedef struct {{\n""".format(self.name)
+
+        # data
+        for line in self.cdefs:
+            typestruct += "\t{0} {1}_{2};\n".format(line['type'], self.fourcc.decode("utf-8").lower(), line['key'])
+
+        typestruct += "}} __attribute__((packed)) {0}Data;\n".format(self.name)
+
+        typestruct += """\ntypedef struct {{
+	char     ID[4];
+	uint8_t  timestamp[6];
+	uint16_t data_length;
+	{0}Data data;
+}} __attribute__((packed)) {0}Message;\n""".format(self.name)
+        
+        return typestruct
+
 
 ADIS = Packet({
     'name': "ADIS16405",
@@ -76,17 +106,17 @@ ADIS = Packet({
     'size': "Fixed",
     'endianness': '!',
     'members': [
-        {'key': "VCC",     'type': "h", 'units': {'mks': "volt",      'scaleby': 0.002418}},
-        {'key': "Gyro_X",  'type': "h", 'units': {'mks': "hertz",     'scaleby': 0.05}},
-        {'key': "Gyro_Y",  'type': "h", 'units': {'mks': "hertz",     'scaleby': 0.05}},
-        {'key': "Gyro_Z",  'type': "h", 'units': {'mks': "hertz",     'scaleby': 0.05}},
-        {'key': "Acc_X",   'type': "h", 'units': {'mks': "meter/s/s", 'scaleby': 0.0333}},
-        {'key': "Acc_Y",   'type': "h", 'units': {'mks': "meter/s/s", 'scaleby': 0.0333}},
-        {'key': "Acc_Z",   'type': "h", 'units': {'mks': "meter/s/s", 'scaleby': 0.0333}},
-        {'key': "Magn_X",  'type': "h", 'units': {'mks': "tesla",     'scaleby': 0.05}},
-        {'key': "Magn_Y",  'type': "h", 'units': {'mks': "tesla",     'scaleby': 0.05}},
-        {'key': "Magn_Z",  'type': "h", 'units': {'mks': "tesla",     'scaleby': 0.05}},
-        {'key': "Temp",    'type': "h", 'units': {'mks': "degree c",  'scaleby': 0.14, 'bias': 25}},
-        {'key': "Aux_ADC", 'type': "h", 'units': {'mks': "volt",      'scaleby': 806}},
+        {'key': "VCC",     'stype': "h", 'ctype': 'uint16_t', 'units': {'mks': "volt",      'scaleby': 0.002418}},
+        {'key': "Gyro_X",  'stype': "h", 'ctype': 'int16_t',  'units': {'mks': "hertz",     'scaleby': 0.05}},
+        {'key': "Gyro_Y",  'stype': "h", 'ctype': 'int16_t',  'units': {'mks': "hertz",     'scaleby': 0.05}},
+        {'key': "Gyro_Z",  'stype': "h", 'ctype': 'int16_t',  'units': {'mks': "hertz",     'scaleby': 0.05}},
+        {'key': "Acc_X",   'stype': "h", 'ctype': 'int16_t',  'units': {'mks': "meter/s/s", 'scaleby': 0.0333}},
+        {'key': "Acc_Y",   'stype': "h", 'ctype': 'int16_t',  'units': {'mks': "meter/s/s", 'scaleby': 0.0333}},
+        {'key': "Acc_Z",   'stype': "h", 'ctype': 'int16_t',  'units': {'mks': "meter/s/s", 'scaleby': 0.0333}},
+        {'key': "Magn_X",  'stype': "h", 'ctype': 'int16_t',  'units': {'mks': "tesla",     'scaleby': 0.05}},
+        {'key': "Magn_Y",  'stype': "h", 'ctype': 'int16_t',  'units': {'mks': "tesla",     'scaleby': 0.05}},
+        {'key': "Magn_Z",  'stype': "h", 'ctype': 'int16_t',  'units': {'mks': "tesla",     'scaleby': 0.05}},
+        {'key': "Temp",    'stype': "h", 'ctype': 'int16_t',  'units': {'mks': "degree c",  'scaleby': 0.14, 'bias': 25}},
+        {'key': "Aux_ADC", 'stype': "h", 'ctype': 'int16_t',  'units': {'mks': "volt",      'scaleby': 806}},
     ]
 })

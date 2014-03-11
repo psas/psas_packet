@@ -1,4 +1,4 @@
-# packet-serializer
+# PSAS Packet Serializer
 
 Reusable PSAS telemetry packet encoder, decoder, documentation, and other tools.
 

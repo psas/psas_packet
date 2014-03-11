@@ -58,6 +58,39 @@ class TestPackets(unittest.TestCase):
         expect += b'\x08\x13\x00\x00\x00\x00\x00\x14\xfe\xda\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\xff\xdd\x00\x00'
         self.assertEqual(packets.ADIS.encode(data, timestamp=t), expect)
 
+    def test_typedef(self):
+
+        self.maxDiff = None
+
+        code = """/*! \\typedef
+ * ADIS16405 data
+ */
+typedef struct {
+	uint16_t adis_vcc;
+	int16_t adis_gyro_x;
+	int16_t adis_gyro_y;
+	int16_t adis_gyro_z;
+	int16_t adis_acc_x;
+	int16_t adis_acc_y;
+	int16_t adis_acc_z;
+	int16_t adis_magn_x;
+	int16_t adis_magn_y;
+	int16_t adis_magn_z;
+	int16_t adis_temp;
+	int16_t adis_aux_adc;
+} __attribute__((packed)) ADIS16405Data;
+
+typedef struct {
+	char     ID[4];
+	uint8_t  timestamp[6];
+	uint16_t data_length;
+	ADIS16405Data data;
+} __attribute__((packed)) ADIS16405Message;
+"""
+
+        self.assertEqual(packets.ADIS.typedef(), code)
+
+
 
     def tearDown(self):
         pass
