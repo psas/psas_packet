@@ -9,6 +9,21 @@ class Packable(float):
         return int(self)
 
 
+class MessageSizeError(Exception):
+    """Raised when the byte str to be unpacked does not match the expected
+    size for this type. Check your message bounderies, or maybe you've
+    reached EOF?
+
+    :param int expected: correct size
+    :param int got: attempted size
+    :returns: MessageSizeError exception
+
+    """
+
+    def __init__(self, expected, got):
+        Exception.__init__(self, "Wrong data size, expected {0}, got {1}".format(expected, got))
+
+
 class Message(object):
     """Instantiates a message type definition
 
@@ -70,6 +85,18 @@ class Message(object):
             values[m['loc']] = Packable(v)
 
         return head + self.struct.pack(*values)
+
+    def decode(self, raw):
+        """Decode a singel message body (the data lines). Header info and
+        message boundaries are solved in network
+
+        :param bytestr raw: Raw string of bytes the length of
+        :returns: A dictionary of values in normal units
+        """
+
+        if len(raw) != self.struct.size:
+            raise(MessageSizeError(self.struct.size, len(raw)))
+            return
 
     def typedef(self):
         """Autogen c style typedef structs

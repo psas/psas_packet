@@ -11,6 +11,10 @@ same type
 
 
 .. autoclass:: psas_packet.messages.Message
-   :members: encode, typedef
+   :members: encode, decode, typedef
 
 
+Exceptions
+==========
+
+.. autoclass::  psas_packet.messages.MessageSizeError

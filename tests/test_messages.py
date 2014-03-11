@@ -58,6 +58,10 @@ class TestMessages(unittest.TestCase):
         expect += b'\x08\x13\x00\x00\x00\x00\x00\x14\xfe\xda\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\xff\xdd\x00\x00'
         self.assertEqual(messages.ADIS.encode(data, timestamp=t), expect)
 
+    def test_decode_too_short(self):
+        raw = b'\x08\x13\x00\x00\x00\x00\x00\x14\xfe\xda\x00\x00\x00'
+        self.assertRaises(messages.MessageSizeError, messages.ADIS.decode, raw)
+
     def test_typedef(self):
 
         self.maxDiff = None
