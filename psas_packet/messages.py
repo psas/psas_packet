@@ -9,14 +9,14 @@ class Packable(float):
         return int(self)
 
 
-class Packet(object):
-    """Instantiates a packet definition
+class Message(object):
+    """Instantiates a message type definition
 
-    :param dict definition: Dictionary defining data in a packet
-    :returns: Packet instance
+    :param dict definition: Dictionary defining data in a message
+    :returns: Message instance
 
     Suitable metadata can be passed in and this class will perform
-    necessary pre-compute steps and create a usable packet instance for
+    necessary pre-compute steps and create a usable message instance for
     a specific data source.
     """
 
@@ -39,7 +39,7 @@ class Packet(object):
             self.struct = struct.Struct(struct_string)
 
     def __repr__(self):
-        return "{0} packet [{1}]".format(self.name, self.fourcc.decode("utf-8"))
+        return "{0} message [{1}]".format(self.name, self.fourcc.decode("utf-8"))
 
     def encode(self, data, timestamp=None):
         """Encode a set of data into binary
@@ -99,7 +99,7 @@ typedef struct {{\n""".format(self.name)
         return typestruct
 
 
-ADIS = Packet({
+ADIS = Message({
     'name': "ADIS16405",
     'fourcc': b'ADIS',
     'size': "Fixed",

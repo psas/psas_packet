@@ -2,7 +2,6 @@
 import sys, os
 sys.path.insert(0, os.path.abspath('..'))
 import psas_packet
-from psas_packet import packets
 
 # -- General configuration -----------------------------------------------------
 extensions = ['sphinx.ext.autodoc',

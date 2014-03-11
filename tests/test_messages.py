@@ -9,16 +9,16 @@ Tests for `packets` module.
 """
 
 import unittest
-from psas_packet import packets
+from psas_packet import messages
 
 
-class TestPackets(unittest.TestCase):
+class TestMessages(unittest.TestCase):
 
     def setUp(self):
         pass
 
     def test_repr(self):
-        self.assertEqual(str(packets.ADIS), "ADIS16405 packet [ADIS]")
+        self.assertEqual(str(messages.ADIS), "ADIS16405 message [ADIS]")
 
     def test_encode(self):
         data = {
@@ -36,7 +36,7 @@ class TestPackets(unittest.TestCase):
             'Aux_ADC': 0,
         }
         expect = b'\x08\x13\x00\x00\x00\x00\x00\x14\xfe\xda\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\xff\xdd\x00\x00'
-        self.assertEqual(packets.ADIS.encode(data), expect)
+        self.assertEqual(messages.ADIS.encode(data), expect)
 
     def test_encode_header(self):
         data = {
@@ -56,7 +56,7 @@ class TestPackets(unittest.TestCase):
         t = 123456
         expect = b'ADIS' + b'\x00\x00\x00\x01\xe2@' + b'\x00\x18'
         expect += b'\x08\x13\x00\x00\x00\x00\x00\x14\xfe\xda\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\xff\xdd\x00\x00'
-        self.assertEqual(packets.ADIS.encode(data, timestamp=t), expect)
+        self.assertEqual(messages.ADIS.encode(data, timestamp=t), expect)
 
     def test_typedef(self):
 
@@ -88,7 +88,7 @@ typedef struct {
 } __attribute__((packed)) ADIS16405Message;
 """
 
-        self.assertEqual(packets.ADIS.typedef(), code)
+        self.assertEqual(messages.ADIS.typedef(), code)
 
     def tearDown(self):
         pass

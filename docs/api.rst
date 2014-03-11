@@ -10,7 +10,7 @@ to decode and encode data, or to get a c code typddef for a message of the
 same type
 
 
-.. autoclass:: psas_packet.packets.Packet
+.. autoclass:: psas_packet.messages.Message
    :members: encode, typedef
 
 
