@@ -128,7 +128,7 @@ typedef struct {{\n""".format(self.name)
         # data
         for line in self.member_list:
             typestruct += "\t{0} {1}_{2};\n".format(line['ctype'],
-                                                    self.fourcc.decode("utf-8").lower(),
+                                                    self.fourcc.decode("utf-8", errors='replace').lower(),
                                                     line['key'].lower())
 
         typestruct += "}} __attribute__((packed)) {0}Data;\n".format(self.name)
@@ -170,10 +170,31 @@ ROLL = Message({
     'size': "Fixed",
     'endianness': '!',
     'members': [
-        {'key': "PWM",     'stype': "H", 'ctype': 'uint16_t','units': {'mks': "seconds", 'scale': 1e-6, 'shift': -1.5e-3}},
+        {'key': "PWM",     'stype': "H", 'ctype': 'uint16_t', 'units': {'mks': "second", 'scale': 1e-6, 'shift': -1.5e-3}},
         {'key': "Disable", 'stype': "B", 'ctype': 'uint8_t'},
     ]
 })
 
+GPS1 = Message({
+    'name': "GPS1",
+    'fourcc': b'GPS'+bytes(1),
+    'size': "Fixed",
+    'endianness': '<',
+    'members': [
+        {'key': "Age_Of_Diff",          'stype': 'B', 'ctype': 'uint8_t', 'units': {'mks': "second"}},
+        {'key': "Num_Of_Sats",          'stype': 'B', 'ctype': 'uint8_t'},
+        {'key': "GPS_Week",             'stype': 'H', 'ctype': 'uint16_t'},
+        {'key': "GPS_Time_Of_Week",     'stype': 'd', 'ctype': 'double', 'units': {'mks': "second"}},
+        {'key': "Latitude",             'stype': 'd', 'ctype': 'double', 'units': {'mks': "degree"}},
+        {'key': "Longitude",            'stype': 'd', 'ctype': 'double', 'units': {'mks': "degree"}},
+        {'key': "Height",               'stype': 'f', 'ctype': 'float', 'units': {'mks': "meter"}},
+        {'key': "VNorth",               'stype': 'f', 'ctype': 'float', 'units': {'mks': "meter/s"}},
+        {'key': "VEast",                'stype': 'f', 'ctype': 'float', 'units': {'mks': "meter/s"}},
+        {'key': "VUp",                  'stype': 'f', 'ctype': 'float', 'units': {'mks': "meter/s"}},
+        {'key': "Std_Dev_Resid",        'stype': 'f', 'ctype': 'float', 'units': {'mks': "meter"}},
+        {'key': "Nav_Mode",             'stype': 'H', 'ctype': 'uint16_t'},
+        {'key': "Extended_Age_Of_Diff", 'stype': 'H', 'ctype': 'uint16_t', 'units': {'mks': "second"}},
+    ]
+})
 
-PSAS_MESSAGES = [ADIS, ROLL]
+PSAS_MESSAGES = [ADIS, ROLL, GPS1]
