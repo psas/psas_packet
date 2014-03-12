@@ -2,6 +2,8 @@
 """
 import struct
 
+g_0 = 9.80665
+
 
 class Packable(float):
 
@@ -81,7 +83,7 @@ class Message(object):
         for key, value in data.items():
             m = self.member_dict[key]
             units = m['units']
-            v = (value - units.get('bias', 0)) / units.get('scaleby', 1)
+            v = (value - units.get('bias', 0)) / units.get('scaleby', 1.0)
             values[m['i']] = Packable(v)
 
         return head + self.struct.pack(*values)
@@ -151,12 +153,12 @@ ADIS = Message({
         {'key': "Gyro_X",  'stype': "h", 'ctype': 'int16_t',  'units': {'mks': "hertz",     'scaleby': 0.05}},
         {'key': "Gyro_Y",  'stype': "h", 'ctype': 'int16_t',  'units': {'mks': "hertz",     'scaleby': 0.05}},
         {'key': "Gyro_Z",  'stype': "h", 'ctype': 'int16_t',  'units': {'mks': "hertz",     'scaleby': 0.05}},
-        {'key': "Acc_X",   'stype': "h", 'ctype': 'int16_t',  'units': {'mks': "meter/s/s", 'scaleby': 0.0333}},
-        {'key': "Acc_Y",   'stype': "h", 'ctype': 'int16_t',  'units': {'mks': "meter/s/s", 'scaleby': 0.0333}},
-        {'key': "Acc_Z",   'stype': "h", 'ctype': 'int16_t',  'units': {'mks': "meter/s/s", 'scaleby': 0.0333}},
-        {'key': "Magn_X",  'stype': "h", 'ctype': 'int16_t',  'units': {'mks': "tesla",     'scaleby': 0.05}},
-        {'key': "Magn_Y",  'stype': "h", 'ctype': 'int16_t',  'units': {'mks': "tesla",     'scaleby': 0.05}},
-        {'key': "Magn_Z",  'stype': "h", 'ctype': 'int16_t',  'units': {'mks': "tesla",     'scaleby': 0.05}},
+        {'key': "Acc_X",   'stype': "h", 'ctype': 'int16_t',  'units': {'mks': "meter/s/s", 'scaleby': 0.00333 * g_0}},
+        {'key': "Acc_Y",   'stype': "h", 'ctype': 'int16_t',  'units': {'mks': "meter/s/s", 'scaleby': 0.00333 * g_0}},
+        {'key': "Acc_Z",   'stype': "h", 'ctype': 'int16_t',  'units': {'mks': "meter/s/s", 'scaleby': 0.00333 * g_0}},
+        {'key': "Magn_X",  'stype': "h", 'ctype': 'int16_t',  'units': {'mks': "tesla",     'scaleby': 5e-8}},
+        {'key': "Magn_Y",  'stype': "h", 'ctype': 'int16_t',  'units': {'mks': "tesla",     'scaleby': 5e-8}},
+        {'key': "Magn_Z",  'stype': "h", 'ctype': 'int16_t',  'units': {'mks': "tesla",     'scaleby': 5e-8}},
         {'key': "Temp",    'stype': "h", 'ctype': 'int16_t',  'units': {'mks': "degree c",  'scaleby': 0.14, 'bias': 25}},
         {'key': "Aux_ADC", 'stype': "h", 'ctype': 'int16_t',  'units': {'mks': "volt",      'scaleby': 806}},
     ]
