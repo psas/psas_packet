@@ -1,5 +1,7 @@
 # PSAS Packet Serializer
 
+[![build status](https://travis-ci.org/psas/packet-serializer.png)](https://travis-ci.org/psas/packet-serializer)
+
 Reusable PSAS telemetry packet encoder, decoder, documentation, and other tools.
 
 ### Documentation:
