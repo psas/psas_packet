@@ -50,7 +50,7 @@ class Message(object):
         if definition['size'] == "Fixed":
             struct_string = definition['endianness']
             for i, m in enumerate(definition['members']):
-                self.member_dict[m['key']] = {'i': i, 'units': m['units']}
+                self.member_dict[m['key']] = {'i': i, 'units': m.get('units', {})}
                 self.member_list.append(m)
                 struct_string += m['stype']
             self.struct = struct.Struct(struct_string)
@@ -163,3 +163,15 @@ ADIS = Message({
         {'key': "Aux_ADC", 'stype': "h", 'ctype': 'int16_t',  'units': {'mks': "volt",      'scaleby': 806}},
     ]
 })
+
+ROLL = Message({
+    'name': "RollServo",
+    'fourcc': b'ROLL',
+    'size': "Fixed",
+    'endianness': '!',
+    'members': [
+        {'key': "PWM",     'stype': "H", 'ctype': 'uint16_t','units': {'mks': "seconds", 'scale': 1e-6, 'shift': -1.5e-3}},
+        {'key': "Disable", 'stype': "B", 'ctype': 'uint8_t'},
+    ]
+})
+
