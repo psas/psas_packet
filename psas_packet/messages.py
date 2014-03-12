@@ -175,3 +175,5 @@ ROLL = Message({
     ]
 })
 
+
+PSAS_MESSAGES = [ADIS, ROLL]
