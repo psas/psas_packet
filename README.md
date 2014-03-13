@@ -1,5 +1,6 @@
 # PSAS Packet Serializer
 
+[![PyPI version](https://badge.fury.io/py/psas_packet.png)](http://badge.fury.io/py/psas_packet)
 [![build status](https://travis-ci.org/psas/packet-serializer.png)](https://travis-ci.org/psas/packet-serializer)
 
 Reusable PSAS telemetry packet encoder, decoder, documentation, and other tools.
@@ -10,7 +11,7 @@ Reusable PSAS telemetry packet encoder, decoder, documentation, and other tools.
 
 ## Install
 
-    pip install -e git+https://github.com/psas/packet-serializer.git
+    pip install psas_packet
 
 ## Develop
 
