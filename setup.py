@@ -13,7 +13,7 @@ setup(
     name='psas_packet',
     version='0.1.1',
     description='serializer for PSAS data standards',
-    long_description=open('README.md').read(),
+    long_description=open('README.rst').read(),
     author='Nathan Bergey',
     author_email='nathan.bergey@gmail.com',
     url='http://psas-packet-serializer.readthedocs.org/',
