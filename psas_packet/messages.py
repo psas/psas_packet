@@ -2,7 +2,25 @@
 """
 import struct
 
-g_0 = 9.80665
+
+# Constant, standard gravity
+g_0 = 9.80665  # m/s/s
+
+
+def printable(s):
+    """takes fourcc code and makes a printable string
+    """
+
+    # GPS fourcc are a corner case
+    if b'GPS' in s:
+        char = s[-1]
+        if type(char) is int:
+            s = 'GPS' + str(char)
+        else:
+            s = 'GPS' + str(ord(char))
+        return s
+
+    return s.decode('utf-8')
 
 
 class Packable(float):
@@ -128,7 +146,7 @@ typedef struct {{\n""".format(self.name)
         # data
         for line in self.member_list:
             typestruct += "\t{0} {1}_{2};\n".format(line['ctype'],
-                                                    self.fourcc.decode("utf-8", errors='replace').lower(),
+                                                    printable(self.fourcc).lower(),
                                                     line['key'].lower())
 
         typestruct += "}} __attribute__((packed)) {0}Data;\n".format(self.name)
@@ -138,7 +156,7 @@ typedef struct {{\n""".format(self.name)
 \tuint8_t  timestamp[6];
 \tuint16_t data_length;
 \t{1}Data data;
-}} __attribute__((packed)) {0}Message;\n""".format(self.fourcc.decode("utf-8"), self.name)
+}} __attribute__((packed)) {0}Message;\n""".format(printable(self.fourcc), self.name)
 
         return typestruct
 
@@ -176,8 +194,8 @@ ROLL = Message({
 })
 
 GPS1 = Message({
-    'name': "GPS1",
-    'fourcc': b'GPS'+bytes(1),
+    'name': "GPSBin1",
+    'fourcc': b'GPS'+chr(1).encode(),
     'size': "Fixed",
     'endianness': '<',
     'members': [
@@ -197,4 +215,19 @@ GPS1 = Message({
     ]
 })
 
-PSAS_MESSAGES = [ADIS, ROLL, GPS1]
+GPS2 = Message({
+    'name': "GPSBin2",
+    'fourcc': b'GPS'+chr(2).encode(),
+    'size': "Fixed",
+    'endianness': '<',
+    'members': [
+        {'key': "Mask_Sats_Tracked",          'stype': 'L', 'ctype': 'uint32_t'},
+        {'key': "Mask_Sats_Used",             'stype': 'L', 'ctype': 'uint32_t'},
+        {'key': "GPS_UTC_Diff",               'stype': 'H', 'ctype': 'uint16_t'},
+        {'key': "HDOP",                       'stype': 'H', 'ctype': 'uint16_t', 'units': {'scaleby': 10}},
+        {'key': "VDOP",                       'stype': 'H', 'ctype': 'uint16_t', 'units': {'scaleby': 10}},
+        {'key': "Mask_WAAS_PRN",              'stype': 'H', 'ctype': 'uint16_t'},
+    ]
+})
+
+PSAS_MESSAGES = [ADIS, ROLL, GPS1, GPS2]
