@@ -4,20 +4,21 @@ PSAS Packet Serializer
 .. image:: https://badge.fury.io/py/psas_packet.png
     :target: http://badge.fury.io/py/psas_packet
 
-.. image:: https://travis-ci.org/psas/packet-serializer.png
-    :target: https://travis-ci.org/psas/packet-serializer
+.. image:: https://travis-ci.org/psas/psas_packet.png
+    :target: https://travis-ci.org/psas/psas_packet
 
-.. image:: https://coveralls.io/repos/psas/packet-serializer/badge.png?branch=master
-    :target: https://coveralls.io/r/psas/packet-serializer?branch=master
+.. image:: https://coveralls.io/repos/psas/psas_packet/badge.png?branch=master
+    :target: https://coveralls.io/r/psas/psas_packet?branch=master
 
 
 Reusable `Portland State Aerospace Society <http://psas.pdx.edu/>`_ telemetry
 packet encoder, decoder, documentation, and other tools.
 
+
 Documentation
 -------------
 
-http://psas-packet-serializer.readthedocs.org/
+http://psas-packet.readthedocs.org/
 
 Install
 ~~~~~~~
