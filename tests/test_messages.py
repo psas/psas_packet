@@ -148,6 +148,11 @@ typedef struct {
         for message in messages.PSAS_MESSAGES:
             self.assertEqual(type(message.typedef()), str)
 
+    def test_fourcc_unique(self):
+        fourcc = [msg.fourcc for msg in messages.PSAS_MESSAGES]
+        dupes = set([x for x in fourcc if fourcc.count(x) > 1])
+        self.assertEqual(len(dupes), 0)
+
     def tearDown(self):
         pass
 
