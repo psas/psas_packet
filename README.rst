@@ -18,7 +18,7 @@ packet encoder, decoder, documentation, and other tools.
 Documentation
 -------------
 
-http://psas-packet.readthedocs.org/
+http://psas-packet-serializer.readthedocs.org
 
 Install
 ~~~~~~~

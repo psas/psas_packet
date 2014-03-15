@@ -16,7 +16,7 @@ setup(
     long_description=open('README.rst').read(),
     author='Nathan Bergey',
     author_email='nathan.bergey@gmail.com',
-    url='http://psas-packet.readthedocs.org/',
+    url='http://psas-packet-serializer.readthedocs.org',
     packages=['psas_packet'],
     package_dir={'psas_packet': 'psas_packet'},
     include_package_data=True,
