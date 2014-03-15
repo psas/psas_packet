@@ -150,6 +150,29 @@ typedef struct {
 
         self.assertEqual(messages.ADIS.typedef(), code)
 
+
+    def test_typedef_corner(self):
+
+        code = """/*! \\typedef
+ * GPSWAASMessage data
+ */
+typedef struct {
+	uint16_t gps80_prn;
+	uint16_t gps80_spare;
+	uint32_t gps80_msg_sec_of_week;
+	char gps80_waas_msg[32];
+} __attribute__((packed)) GPSWAASMessageData;
+
+typedef struct {
+	char     ID[4];
+	uint8_t  timestamp[6];
+	uint16_t data_length;
+	GPSWAASMessageData data;
+} __attribute__((packed)) GPS80Message;
+"""
+
+        self.assertEqual(messages.GPS80.typedef(), code)
+
     def tearDown(self):
         pass
 

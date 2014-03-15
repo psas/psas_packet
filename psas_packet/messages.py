@@ -145,9 +145,15 @@ typedef struct {{\n""".format(self.name)
 
         # data
         for line in self.member_list:
-            typestruct += "\t{0} {1}_{2};\n".format(line['ctype'],
-                                                    printable(self.fourcc).lower(),
-                                                    line['key'].lower())
+            ctype = line['ctype']
+            size = None
+            if '|' in ctype:
+                ctype, size = ctype.split('|')
+            var = "{0}_{1}".format(printable(self.fourcc).lower(),line['key'].lower())
+
+            if size is not None:
+                var = var + '[{0}]'.format(size)
+            typestruct += "\t{0} {1};\n".format(ctype, var)
 
         typestruct += "}} __attribute__((packed)) {0}Data;\n".format(self.name)
 
@@ -194,7 +200,7 @@ ROLL = Message({
 })
 
 GPS1 = Message({
-    'name': "GPSBin1",
+    'name': "GPSFix",
     'fourcc': b'GPS'+chr(1).encode(),
     'size': "Fixed",
     'endianness': '<',
@@ -216,18 +222,38 @@ GPS1 = Message({
 })
 
 GPS2 = Message({
-    'name': "GPSBin2",
+    'name': "GPSFixQuality",
     'fourcc': b'GPS'+chr(2).encode(),
     'size': "Fixed",
     'endianness': '<',
     'members': [
-        {'key': "Mask_Sats_Tracked",          'stype': 'L', 'ctype': 'uint32_t'},
-        {'key': "Mask_Sats_Used",             'stype': 'L', 'ctype': 'uint32_t'},
-        {'key': "GPS_UTC_Diff",               'stype': 'H', 'ctype': 'uint16_t'},
-        {'key': "HDOP",                       'stype': 'H', 'ctype': 'uint16_t', 'units': {'scaleby': 10}},
-        {'key': "VDOP",                       'stype': 'H', 'ctype': 'uint16_t', 'units': {'scaleby': 10}},
-        {'key': "Mask_WAAS_PRN",              'stype': 'H', 'ctype': 'uint16_t'},
+        {'key': "Mask_Sats_Tracked",    'stype': 'L', 'ctype': 'uint32_t'},
+        {'key': "Mask_Sats_Used",       'stype': 'L', 'ctype': 'uint32_t'},
+        {'key': "GPS_UTC_Diff",         'stype': 'H', 'ctype': 'uint16_t'},
+        {'key': "HDOP",                 'stype': 'H', 'ctype': 'uint16_t', 'units': {'scaleby': 10}},
+        {'key': "VDOP",                 'stype': 'H', 'ctype': 'uint16_t', 'units': {'scaleby': 10}},
+        {'key': "Mask_WAAS_PRN",        'stype': 'H', 'ctype': 'uint16_t'},
     ]
 })
 
-PSAS_MESSAGES = [ADIS, ROLL, GPS1, GPS2]
+GPS80 = Message({
+    'name': "GPSWAASMessage",
+    'fourcc': b'GPS'+chr(80).encode(),
+    'size': "Fixed",
+    'endianness': '<',
+    'members': [
+        {'key': "PRN",                  'stype': 'H',   'ctype': 'uint16_t'},
+        {'key': "Spare",                'stype': 'H',   'ctype': 'uint16_t'},
+        {'key': "Msg_Sec_of_Week",      'stype': 'L',   'ctype': 'uint32_t'},
+        {'key': "Waas_Msg",             'stype': '32s', 'ctype': 'char|32'},
+    ]
+})
+
+# A list of all message types we know about
+PSAS_MESSAGES = [
+    ADIS,
+    ROLL,
+    GPS1,
+    GPS2,
+    GPS80
+]
