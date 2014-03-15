@@ -12,15 +12,10 @@ import unittest
 from math import fabs
 from psas_packet import messages
 
-
 class TestMessages(unittest.TestCase):
 
     def setUp(self):
         pass
-
-    def test_repr(self):
-        self.assertEqual(str(messages.ADIS), "ADIS16405 message [ADIS]")
-
 
     def test_encode(self):
         data = {
@@ -120,10 +115,9 @@ class TestMessages(unittest.TestCase):
 
     def test_typedef(self):
 
-        self.maxDiff = None
 
         code = """/*! \\typedef
- * ADIS16405 data
+ * ADIS16405 Data
  */
 typedef struct {
 	uint16_t adis_vcc;
@@ -137,7 +131,7 @@ typedef struct {
 	int16_t adis_magn_y;
 	int16_t adis_magn_z;
 	int16_t adis_temp;
-	int16_t adis_aux_adc;
+	uint16_t adis_aux_adc;
 } __attribute__((packed)) ADIS16405Data;
 
 typedef struct {
@@ -154,7 +148,7 @@ typedef struct {
     def test_typedef_corner(self):
 
         code = """/*! \\typedef
- * GPSWAASMessage data
+ * GPSWAASMessage Data
  */
 typedef struct {
 	uint16_t gps80_prn;

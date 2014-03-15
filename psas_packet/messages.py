@@ -6,6 +6,18 @@ import struct
 # Constant, standard gravity
 g_0 = 9.80665  # m/s/s
 
+CTYPES = {
+    'B': 'uint8_t',
+    'b':  'int8_t',
+    'H': 'uint16_t',
+    'h':  'int16_t',
+    'L': 'uint32_t',
+    'l':  'int32_t',
+    'Q': 'uint64_t',
+    'q':  'int64_t',
+    'f': 'float',
+    'd': 'double',
+}
 
 def printable(s):
     """takes fourcc code and makes a printable string
@@ -138,21 +150,24 @@ class Message(object):
         """
 
         # Header comment
-        typestruct = """/*! \\typedef
- * {0} data
- */
-typedef struct {{\n""".format(self.name)
+        typestruct =  "/*! \\typedef\n"
+        typestruct += " * {0} Data\n".format(self.name)
+        typestruct += " */\n"
+        typestruct += "typedef struct {\n"
 
         # data
         for line in self.member_list:
-            ctype = line['ctype']
-            size = None
-            if '|' in ctype:
-                ctype, size = ctype.split('|')
-            var = "{0}_{1}".format(printable(self.fourcc).lower(),line['key'].lower())
+            stype = line['stype']
 
-            if size is not None:
+            var = "{0}_{1}".format(printable(self.fourcc).lower(), line['key'].lower())
+
+            if 's' in stype:
+                ctype = 'char'
+                size = int(stype.replace('s', ''))
                 var = var + '[{0}]'.format(size)
+            else:
+                ctype = CTYPES[stype]
+            
             typestruct += "\t{0} {1};\n".format(ctype, var)
 
         typestruct += "}} __attribute__((packed)) {0}Data;\n".format(self.name)
@@ -167,24 +182,25 @@ typedef struct {{\n""".format(self.name)
         return typestruct
 
 
+# Here we define known PSAS message types
 ADIS = Message({
     'name': "ADIS16405",
     'fourcc': b'ADIS',
     'size': "Fixed",
     'endianness': '!',
     'members': [
-        {'key': "VCC",     'stype': "h", 'ctype': 'uint16_t', 'units': {'mks': "volt",      'scaleby': 0.002418}},
-        {'key': "Gyro_X",  'stype': "h", 'ctype': 'int16_t',  'units': {'mks': "hertz",     'scaleby': 0.05}},
-        {'key': "Gyro_Y",  'stype': "h", 'ctype': 'int16_t',  'units': {'mks': "hertz",     'scaleby': 0.05}},
-        {'key': "Gyro_Z",  'stype': "h", 'ctype': 'int16_t',  'units': {'mks': "hertz",     'scaleby': 0.05}},
-        {'key': "Acc_X",   'stype': "h", 'ctype': 'int16_t',  'units': {'mks': "meter/s/s", 'scaleby': 0.00333 * g_0}},
-        {'key': "Acc_Y",   'stype': "h", 'ctype': 'int16_t',  'units': {'mks': "meter/s/s", 'scaleby': 0.00333 * g_0}},
-        {'key': "Acc_Z",   'stype': "h", 'ctype': 'int16_t',  'units': {'mks': "meter/s/s", 'scaleby': 0.00333 * g_0}},
-        {'key': "Magn_X",  'stype': "h", 'ctype': 'int16_t',  'units': {'mks': "tesla",     'scaleby': 5e-8}},
-        {'key': "Magn_Y",  'stype': "h", 'ctype': 'int16_t',  'units': {'mks': "tesla",     'scaleby': 5e-8}},
-        {'key': "Magn_Z",  'stype': "h", 'ctype': 'int16_t',  'units': {'mks': "tesla",     'scaleby': 5e-8}},
-        {'key': "Temp",    'stype': "h", 'ctype': 'int16_t',  'units': {'mks': "degree c",  'scaleby': 0.14, 'bias': 25}},
-        {'key': "Aux_ADC", 'stype': "h", 'ctype': 'int16_t',  'units': {'mks': "volt",      'scaleby': 806}},
+        {'key': "VCC",     'stype': "H", 'units': {'mks': "volt",      'scaleby': 0.002418}},
+        {'key': "Gyro_X",  'stype': "h", 'units': {'mks': "hertz",     'scaleby': 0.05}},
+        {'key': "Gyro_Y",  'stype': "h", 'units': {'mks': "hertz",     'scaleby': 0.05}},
+        {'key': "Gyro_Z",  'stype': "h", 'units': {'mks': "hertz",     'scaleby': 0.05}},
+        {'key': "Acc_X",   'stype': "h", 'units': {'mks': "meter/s/s", 'scaleby': 0.00333 * g_0}},
+        {'key': "Acc_Y",   'stype': "h", 'units': {'mks': "meter/s/s", 'scaleby': 0.00333 * g_0}},
+        {'key': "Acc_Z",   'stype': "h", 'units': {'mks': "meter/s/s", 'scaleby': 0.00333 * g_0}},
+        {'key': "Magn_X",  'stype': "h", 'units': {'mks': "tesla",     'scaleby': 5e-8}},
+        {'key': "Magn_Y",  'stype': "h", 'units': {'mks': "tesla",     'scaleby': 5e-8}},
+        {'key': "Magn_Z",  'stype': "h", 'units': {'mks': "tesla",     'scaleby': 5e-8}},
+        {'key': "Temp",    'stype': "h", 'units': {'mks': "degree c",  'scaleby': 0.14, 'bias': 25}},
+        {'key': "Aux_ADC", 'stype': "H", 'units': {'mks': "volt",      'scaleby': 806}},
     ]
 })
 
@@ -194,8 +210,8 @@ ROLL = Message({
     'size': "Fixed",
     'endianness': '!',
     'members': [
-        {'key': "PWM",     'stype': "H", 'ctype': 'uint16_t', 'units': {'mks': "second", 'scale': 1e-6, 'shift': -1.5e-3}},
-        {'key': "Disable", 'stype': "B", 'ctype': 'uint8_t'},
+        {'key': "PWM",                  'stype': "H", 'units': {'mks': "second", 'scale': 1e-6, 'shift': -1.5e-3}},
+        {'key': "Disable",              'stype': "B"},
     ]
 })
 
@@ -205,19 +221,19 @@ GPS1 = Message({
     'size': "Fixed",
     'endianness': '<',
     'members': [
-        {'key': "Age_Of_Diff",          'stype': 'B', 'ctype': 'uint8_t', 'units': {'mks': "second"}},
-        {'key': "Num_Of_Sats",          'stype': 'B', 'ctype': 'uint8_t'},
-        {'key': "GPS_Week",             'stype': 'H', 'ctype': 'uint16_t'},
-        {'key': "GPS_Time_Of_Week",     'stype': 'd', 'ctype': 'double', 'units': {'mks': "second"}},
-        {'key': "Latitude",             'stype': 'd', 'ctype': 'double', 'units': {'mks': "degree"}},
-        {'key': "Longitude",            'stype': 'd', 'ctype': 'double', 'units': {'mks': "degree"}},
-        {'key': "Height",               'stype': 'f', 'ctype': 'float', 'units': {'mks': "meter"}},
-        {'key': "VNorth",               'stype': 'f', 'ctype': 'float', 'units': {'mks': "meter/s"}},
-        {'key': "VEast",                'stype': 'f', 'ctype': 'float', 'units': {'mks': "meter/s"}},
-        {'key': "VUp",                  'stype': 'f', 'ctype': 'float', 'units': {'mks': "meter/s"}},
-        {'key': "Std_Dev_Resid",        'stype': 'f', 'ctype': 'float', 'units': {'mks': "meter"}},
-        {'key': "Nav_Mode",             'stype': 'H', 'ctype': 'uint16_t'},
-        {'key': "Extended_Age_Of_Diff", 'stype': 'H', 'ctype': 'uint16_t', 'units': {'mks': "second"}},
+        {'key': "Age_Of_Diff",          'stype': 'B', 'units': {'mks': "second"}},
+        {'key': "Num_Of_Sats",          'stype': 'B'},
+        {'key': "GPS_Week",             'stype': 'H'},
+        {'key': "GPS_Time_Of_Week",     'stype': 'd', 'units': {'mks': "second"}},
+        {'key': "Latitude",             'stype': 'd', 'units': {'mks': "degree"}},
+        {'key': "Longitude",            'stype': 'd', 'units': {'mks': "degree"}},
+        {'key': "Height",               'stype': 'f', 'units': {'mks': "meter"}},
+        {'key': "VNorth",               'stype': 'f', 'units': {'mks': "meter/s"}},
+        {'key': "VEast",                'stype': 'f', 'units': {'mks': "meter/s"}},
+        {'key': "VUp",                  'stype': 'f', 'units': {'mks': "meter/s"}},
+        {'key': "Std_Dev_Resid",        'stype': 'f', 'units': {'mks': "meter"}},
+        {'key': "Nav_Mode",             'stype': 'H'},
+        {'key': "Extended_Age_Of_Diff", 'stype': 'H', 'units': {'mks': "second"}},
     ]
 })
 
@@ -227,12 +243,12 @@ GPS2 = Message({
     'size': "Fixed",
     'endianness': '<',
     'members': [
-        {'key': "Mask_Sats_Tracked",    'stype': 'L', 'ctype': 'uint32_t'},
-        {'key': "Mask_Sats_Used",       'stype': 'L', 'ctype': 'uint32_t'},
-        {'key': "GPS_UTC_Diff",         'stype': 'H', 'ctype': 'uint16_t'},
-        {'key': "HDOP",                 'stype': 'H', 'ctype': 'uint16_t', 'units': {'scaleby': 10}},
-        {'key': "VDOP",                 'stype': 'H', 'ctype': 'uint16_t', 'units': {'scaleby': 10}},
-        {'key': "Mask_WAAS_PRN",        'stype': 'H', 'ctype': 'uint16_t'},
+        {'key': "Mask_Sats_Tracked",    'stype': 'L'},
+        {'key': "Mask_Sats_Used",       'stype': 'L'},
+        {'key': "GPS_UTC_Diff",         'stype': 'H'},
+        {'key': "HDOP",                 'stype': 'H', 'units': {'scaleby': 10}},
+        {'key': "VDOP",                 'stype': 'H', 'units': {'scaleby': 10}},
+        {'key': "Mask_WAAS_PRN",        'stype': 'H'},
     ]
 })
 
@@ -242,12 +258,39 @@ GPS80 = Message({
     'size': "Fixed",
     'endianness': '<',
     'members': [
-        {'key': "PRN",                  'stype': 'H',   'ctype': 'uint16_t'},
-        {'key': "Spare",                'stype': 'H',   'ctype': 'uint16_t'},
-        {'key': "Msg_Sec_of_Week",      'stype': 'L',   'ctype': 'uint32_t'},
-        {'key': "Waas_Msg",             'stype': '32s', 'ctype': 'char|32'},
+        {'key': "PRN",                  'stype': 'H'},
+        {'key': "Spare",                'stype': 'H'},
+        {'key': "Msg_Sec_of_Week",      'stype': 'L'},
+        {'key': "Waas_Msg",             'stype': '32s'},
     ]
 })
+
+GPS93 = Message({
+    'name': "GPSWAASEphemeris",
+    'fourcc': b'GPS'+chr(93).encode(),
+    'size': "Fixed",
+    'endianness': '<',
+    'members': [
+        {'key': "SV",                   'stype': 'H'},
+        {'key': "spare",                'stype': 'H'},
+        {'key': "TOW_Sec-of-Week",      'stype': 'L'},
+        {'key': "IODE",                 'stype': 'H'},
+        {'key': "URA",                  'stype': 'H'},
+        {'key': "T_Zero",               'stype': 'l'},
+        {'key': "XG",                   'stype': 'l', 'units': {'mks': "meter", 'scaleby': 0.08}},
+        {'key': "YG",                   'stype': 'l', 'units': {'mks': "meter", 'scaleby': 0.08}},
+        {'key': "ZG",                   'stype': 'l', 'units': {'mks': "meter", 'scaleby': 0.4}},
+        {'key': "XG_Dot",               'stype': 'l', 'units': {'mks': "meter/s", 'scaleby': 0.000625}},
+        {'key': "YG_Dot",               'stype': 'l', 'units': {'mks': "meter/s", 'scaleby': 0.000625}},
+        {'key': "ZG_Dot",               'stype': 'l', 'units': {'mks': "meter/s", 'scaleby': 0.004}},
+        {'key': "XG_DotDot",            'stype': 'l', 'units': {'mks': "meter/s/s", 'scaleby': 0.0000125}},
+        {'key': "YG_DotDot",            'stype': 'l', 'units': {'mks': "meter/s/s", 'scaleby': 0.0000125}},
+        {'key': "ZG_DotDot",            'stype': 'l', 'units': {'mks': "meter/s/s", 'scaleby': 0.0000625}},
+        {'key': "Gf_Zero",              'stype': 'H'},
+        {'key': "Gf_Zero_Dot",          'stype': 'H'},
+    ]
+})
+
 
 # A list of all message types we know about
 PSAS_MESSAGES = [
