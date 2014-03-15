@@ -2,10 +2,10 @@
 # -*- coding: utf-8 -*-
 
 """
-test_packets
+test_messages
 ----------------------------------
 
-Tests for `packets` module.
+Tests for `messages` module.
 """
 
 import unittest
@@ -34,26 +34,6 @@ class TestMessages(unittest.TestCase):
         }
         expect = b'\x08\x13\x00\x00\x00\x00\x00\x14\xfe\xd4\x00\x00\x00\x00\x04$\x00\x00\x00\x00\xff\xdd\x00\x00'
         self.assertEqual(messages.ADIS.encode(data), expect)
-
-    def test_encode_header(self):
-        data = {
-            'VCC': 5.0,
-            'Gyro_X': 0.0,
-            'Gyro_Y': 0,
-            'Gyro_Z': 1,
-            'Acc_X': -9.8,
-            'Acc_Y': 0,
-            'Acc_Z': 0,
-            'Magn_X': 5.3e-5,
-            'Magn_Y': 0,
-            'Magn_Z': 0,
-            'Temp': 20,
-            'Aux_ADC': 0,
-        }
-        t = 123456
-        expect = b'ADIS' + b'\x00\x00\x00\x01\xe2@' + b'\x00\x18'
-        expect += b'\x08\x13\x00\x00\x00\x00\x00\x14\xfe\xd4\x00\x00\x00\x00\x04$\x00\x00\x00\x00\xff\xdd\x00\x00'
-        self.assertEqual(messages.ADIS.encode(data, timestamp=t), expect)
 
     def test_decode_too_short(self):
         raw = b'\x08\x13\x00\x00\x00\x00\x00\x14\xfe\xda\x00\x00\x00'
@@ -111,10 +91,7 @@ class TestMessages(unittest.TestCase):
             sigfig = fabs(data[item]) / 100.0 # 1%
             self.assertAlmostEqual(data[item], value, delta=sigfig)
 
-        
-
     def test_typedef(self):
-
 
         code = """/*! \\typedef
  * ADIS16405 Data
@@ -143,7 +120,6 @@ typedef struct {
 """
 
         self.assertEqual(messages.ADIS.typedef(), code)
-
 
     def test_typedef_corner(self):
 

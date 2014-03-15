@@ -1,8 +1,5 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-import os
-import sys
-
 try:
     from setuptools import setup
 except ImportError:
@@ -11,7 +8,7 @@ except ImportError:
 
 setup(
     name='psas_packet',
-    version='0.1.3',
+    version='0.1.4',
     description='serializer for PSAS data standards',
     long_description=open('README.rst').read(),
     author='Nathan Bergey',
@@ -20,9 +17,8 @@ setup(
     packages=['psas_packet'],
     package_dir={'psas_packet': 'psas_packet'},
     include_package_data=True,
-    install_requires=[
-    ],
-    scripts = [
+    install_requires=[],
+    scripts=[
         'scripts/gen-psas-types',
     ],
     license=open('LICENSE').read(),

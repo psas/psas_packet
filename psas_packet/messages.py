@@ -1,29 +1,35 @@
-""" Packet definitions
+""" PSAS Message definitions.
 """
 import struct
-
 
 # Constant, standard gravity
 g_0 = 9.80665  # m/s/s
 
+# conversion to c types
 CTYPES = {
     'B': 'uint8_t',
-    'b':  'int8_t',
+    'b': 'int8_t',
     'H': 'uint16_t',
-    'h':  'int16_t',
+    'h': 'int16_t',
     'L': 'uint32_t',
-    'l':  'int32_t',
+    'l': 'int32_t',
     'Q': 'uint64_t',
-    'q':  'int64_t',
+    'q': 'int64_t',
     'f': 'float',
     'd': 'double',
 }
 
+
 def printable(s):
-    """takes fourcc code and makes a printable string
+    """Takes fourcc code and makes a printable string
+
+    :param bytes s: Four character code
+
+    GPS fourccs have the last character as a raw byte. When we print them the
+    byte should be converted to a string number. For example 'GPS\\x5e' should
+    print as GPS94, not GPS^.
     """
 
-    # GPS fourcc are a corner case
     if b'GPS' in s:
         char = s[-1]
         if type(char) is int:
@@ -35,8 +41,8 @@ def printable(s):
     return s.decode('utf-8')
 
 
+# for some reason floats in python 3 wont cast to int
 class Packable(float):
-
     def __index__(self):
         return int(self)
 
@@ -53,7 +59,8 @@ class MessageSizeError(Exception):
     """
 
     def __init__(self, expected, got):
-        Exception.__init__(self, "Wrong data size, expected {0}, got {1}".format(expected, got))
+        msg = "Wrong data size, expected {0}, got {1}".format(expected, got)
+        Exception.__init__(self, msg)
 
 
 class Message(object):
@@ -66,9 +73,6 @@ class Message(object):
     necessary pre-compute steps and create a usable message instance for
     a specific data source.
     """
-
-    # This header is consistent across messages
-    header = struct.Struct('!4sHLH')
 
     def __init__(self, definition):
         self.name = definition['name']
@@ -86,25 +90,17 @@ class Message(object):
             self.struct = struct.Struct(struct_string)
 
     def __repr__(self):
-        return "{0} message [{1}]".format(self.name, self.fourcc.decode("utf-8"))
+        return "{0} message type".format(self.name)
 
-    def encode(self, data, timestamp=None):
+    def encode(self, data):
         """Encode a set of data into binary
 
         :param dict data: A dictionary of values to encode
-        :param int timestamp: Time since boot in nanoseconds
         :returns: Binary ecoded data
 
-        Uses the struct package to encode data. Objects should match keys in
-        the members list.
+        Uses the struct package to encode into byte array. The dictionary should
+        have values who's keys match the members list.
         """
-
-        # Make header if given timestamp
-        head = b''
-        if timestamp is not None:
-            timestamp_hi = (timestamp >> 32) & 0xffff
-            timestamp_lo = timestamp & 0xffffffff
-            head = self.header.pack(self.fourcc, timestamp_hi, timestamp_lo, self.struct.size)
 
         # Initialize as zeros
         values = [0] * len(self.member_list)
@@ -113,10 +109,14 @@ class Message(object):
         for key, value in data.items():
             m = self.member_dict[key]
             units = m['units']
+
+            # from native units to packed representation
             v = (value - units.get('bias', 0)) / units.get('scaleby', 1.0)
+
+            # put value in the right place in the list
             values[m['i']] = Packable(v)
 
-        return head + self.struct.pack(*values)
+        return self.struct.pack(*values)
 
     def decode(self, raw):
         """Decode a single message body (the data lines). Header info and
@@ -150,7 +150,7 @@ class Message(object):
         """
 
         # Header comment
-        typestruct =  "/*! \\typedef\n"
+        typestruct = "/*! \\typedef\n"
         typestruct += " * {0} Data\n".format(self.name)
         typestruct += " */\n"
         typestruct += "typedef struct {\n"
@@ -167,7 +167,7 @@ class Message(object):
                 var = var + '[{0}]'.format(size)
             else:
                 ctype = CTYPES[stype]
-            
+
             typestruct += "\t{0} {1};\n".format(ctype, var)
 
         typestruct += "}} __attribute__((packed)) {0}Data;\n".format(self.name)
@@ -182,7 +182,7 @@ class Message(object):
         return typestruct
 
 
-# Here we define known PSAS message types
+# Here we define known PSAS message types:
 ADIS = Message({
     'name': "ADIS16405",
     'fourcc': b'ADIS',
@@ -298,5 +298,6 @@ PSAS_MESSAGES = [
     ROLL,
     GPS1,
     GPS2,
-    GPS80
+    GPS80,
+    GPS93,
 ]
