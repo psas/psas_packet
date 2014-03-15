@@ -143,6 +143,11 @@ typedef struct {
 
         self.assertEqual(messages.GPS80.typedef(), code)
 
+    def test_build_typedef(self):
+
+        for message in messages.PSAS_MESSAGES:
+            self.assertEqual(type(message.typedef()), str)
+
     def tearDown(self):
         pass
 
