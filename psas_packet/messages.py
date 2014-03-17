@@ -135,7 +135,7 @@ class Message(object):
         values = {}
         for i, v in enumerate(unpack):
             m = self.member_list[i]
-            units = m['units']
+            units = m.get('units', {})
             v = (v * units.get('scaleby', 1)) + units.get('bias', 0)
 
             values[m['key']] = v
@@ -210,7 +210,7 @@ ROLL = Message({
     'size': "Fixed",
     'endianness': '!',
     'members': [
-        {'key': "PWM",                  'stype': "H", 'units': {'mks': "second", 'scale': 1e-6, 'shift': -1.5e-3}},
+        {'key': "PWM",                  'stype': "H", 'units': {'mks': "second", 'scaleby': 1e-6, 'bias': -1.5e-3}},
         {'key': "Disable",              'stype': "B"},
     ]
 })

@@ -35,6 +35,16 @@ class TestMessages(unittest.TestCase):
         expect = b'\x08\x13\x00\x00\x00\x00\x00\x14\xfe\xd4\x00\x00\x00\x00\x04$\x00\x00\x00\x00\xff\xdd\x00\x00'
         self.assertEqual(messages.ADIS.encode(data), expect)
 
+    def test_roll_message(self):
+        data = {'PWM': -1.35e-3, 'Disable': 1}
+
+        encode = messages.ROLL.encode(data)
+        decode = messages.ROLL.decode(encode)
+
+        self.assertAlmostEqual(decode['PWM'], data['PWM'], delta=0.1e-3)
+        self.assertEqual(decode['Disable'], data['Disable'])
+
+
     def test_decode_too_short(self):
         raw = b'\x08\x13\x00\x00\x00\x00\x00\x14\xfe\xda\x00\x00\x00'
         self.assertRaises(messages.MessageSizeError, messages.ADIS.decode, raw)
