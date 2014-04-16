@@ -215,6 +215,29 @@ ROLL = Message({
     ]
 })
 
+LTC = Message({
+    'name': "LaunchTowerComputer",
+    'fourcc': b'LTCH',
+    'size': "Fixed",
+    'endianness': '!',
+    'members': [
+        {'key': "Rocket_Ready",                  'stype': "f", 'units': {'mks': "volt"}},
+        {'key': "Iginition_Relay",               'stype': "B"},
+        {'key': "Ignition_Battery",              'stype': "f", 'units': {'mks': "volt"}},
+        {'key': "Shore_Power_Relay",             'stype': "B"},
+        {'key': "Shore_Power",                   'stype': "f", 'units': {'mks': "volt"}},
+        {'key': "Solar_Voltage",                 'stype': "f", 'units': {'mks': "volt"}},
+        {'key': "System_Battery",                'stype': "f", 'units': {'mks': "volt"}},
+        {'key': "Internal_Temp",                 'stype': "f", 'units': {'mks': "celsius"}},
+        {'key': "External_Temp",                 'stype': "f", 'units': {'mks': "celsius"}},
+        {'key': "Humidity",                      'stype': "f"},
+        {'key': "Wind_Speed",                    'stype': "f"},
+        {'key': "Wind_Direction",                'stype': "f"},
+        {'key': "Barometric_Pressure",           'stype': "f"}
+    ]
+})
+
+
 GPS1 = Message({
     'name': "GPSFix",
     'fourcc': b'GPS'+chr(1).encode(),
@@ -658,6 +681,7 @@ GPS99 = Message({
 PSAS_MESSAGES = [
     ADIS,
     ROLL,
+    LTC,
     GPS1,
     GPS2,
     GPS80,
