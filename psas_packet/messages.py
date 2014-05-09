@@ -63,6 +63,38 @@ class MessageSizeError(Exception):
         Exception.__init__(self, msg)
 
 
+class Head(object):
+    """Methods to encode and decodes message headers
+    """
+
+    struct = struct.Struct('!4sHLH')
+
+    def __init__(self):
+        self.size = self.struct.size
+
+    def encode(self, message_class, time):
+        fourcc = message_class.fourcc
+        length = message_class.struct.size
+
+        # make timestamp
+        timestamp_hi = (time >> 32) & 0xffff
+        timestamp_lo = time & 0xffffffff
+
+        # encode
+        raw = self.struct.pack(fourcc, timestamp_hi, timestamp_lo, length)
+        return raw
+
+    def decode(self, raw):
+
+        if len(raw) != self.struct.size:
+            raise(MessageSizeError(self.struct.size, len(raw)))
+            return
+
+        fourcc, timestamp_hi, timestamp_lo, message_length = self.struct.unpack(raw)
+        timestamp = timestamp_hi << 32 | timestamp_lo
+
+        return {'fourcc': fourcc,'timestamp': timestamp, 'length': message_length}
+
 class Message(object):
     """Instantiates a message type definition
 
