@@ -72,24 +72,13 @@ class ListenUDP(object):
         """
         self.socket.close()
 
-    def listen(self, timeout=0):
+    def listen(self):
         """Listen for messages on the socket
         """
+        data = None
+        try:
+            data, addr = self.socket.recvfrom(1400)
+        except socket.timeout:
+            pass
 
-        begin = time.time()
-
-        if timeout > 0:
-            end = begin + timeout
-        else:
-            # 100 years in the future. Seems safe.
-            end = begin + 3.2e9
-
-        # loop until timeout
-        while time.time() < end:
-            data = None
-            try:
-                data, addr = self.socket.recvfrom(1400)
-                if data is not None:
-                    yield data
-            except socket.timeout:
-                pass
+        return data

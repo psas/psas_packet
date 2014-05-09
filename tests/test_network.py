@@ -42,8 +42,8 @@ class TestNetworkRecieve(unittest.TestCase):
 
         with network.ListenUDP(1934) as listen:
             self.sender.send_message(messages.ROLL, data)
-            recv_data = [i for i in listen.listen(timeout=1)]
-            self.assertEqual(messages.ROLL.encode(data), recv_data[0])
+            recv_data = listen.listen()
+            self.assertEqual(messages.ROLL.encode(data), recv_data)
 
     def tearDown(self):
         self.sender.close()
