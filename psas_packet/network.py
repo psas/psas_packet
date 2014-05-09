@@ -2,6 +2,7 @@
 """Network stack for exchanging packets with messages.
 """
 import socket
+import time
 
 class SendUDP(object):
     """UDP socket sender context
@@ -46,3 +47,49 @@ class SendUDP(object):
 
         """
         self.socket.send(msgtype.encode(data))
+
+
+class ListenUDP(object):
+    """UDP socket listener context
+    """
+
+    def __init__(self, listen_port, bind=''):
+        self.bind_addr = bind
+        self.listen_port = listen_port
+
+        self.socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        self.socket.bind((self.bind_addr, self.listen_port))
+        self.socket.settimeout(0.01)
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, type, value, tb):
+        self.close()
+
+    def close(self):
+        """Release the socket
+        """
+        self.socket.close()
+
+    def listen(self, timeout=0):
+        """Listen for messages on the socket
+        """
+
+        begin = time.time()
+
+        if timeout > 0:
+            end = begin + timeout
+        else:
+            # 100 years in the future. Seems safe.
+            end = begin + 3.2e9
+
+        # loop until timeout
+        while time.time() < end:
+            data = None
+            try:
+                data, addr = self.socket.recvfrom(1400)
+                if data is not None:
+                    yield data
+            except socket.timeout:
+                pass
