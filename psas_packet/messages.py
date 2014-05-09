@@ -72,7 +72,12 @@ class Head(object):
     def __init__(self):
         self.size = self.struct.size
 
-    def encode(self, message_class, time):
+    @classmethod
+    def size(cls):
+        return cls.struct.size
+
+    @classmethod
+    def encode(cls, message_class, time):
         fourcc = message_class.fourcc
         length = message_class.struct.size
 
@@ -81,19 +86,21 @@ class Head(object):
         timestamp_lo = time & 0xffffffff
 
         # encode
-        raw = self.struct.pack(fourcc, timestamp_hi, timestamp_lo, length)
+        raw = cls.struct.pack(fourcc, timestamp_hi, timestamp_lo, length)
         return raw
 
-    def decode(self, raw):
+    @classmethod
+    def decode(cls, raw):
 
-        if len(raw) != self.struct.size:
-            raise(MessageSizeError(self.struct.size, len(raw)))
+        if len(raw) != cls.struct.size:
+            raise(MessageSizeError(cls.struct.size, len(raw)))
             return
 
-        fourcc, timestamp_hi, timestamp_lo, message_length = self.struct.unpack(raw)
+        fourcc, timestamp_hi, timestamp_lo, message_length = cls.struct.unpack(raw)
         timestamp = timestamp_hi << 32 | timestamp_lo
 
-        return {'fourcc': fourcc,'timestamp': timestamp, 'length': message_length}
+        return {'fourcc': fourcc, 'timestamp': timestamp, 'length': message_length}
+
 
 class Message(object):
     """Instantiates a message type definition
@@ -466,7 +473,7 @@ GPS99 = Message({
     'size': "Fixed",
     'endianness': '<',
     'members': [
-        {'key': "Nav_Mode_2",           'stype': 'B'}, 
+        {'key': "Nav_Mode_2",           'stype': 'B'},
         {'key': "UTC_Time_Diff",        'stype': 'B', 'units': {'mks': "second"}},
         {'key': "GPS_Week",             'stype': 'H'},
         {'key': "GPS_Time_of_Week",     'stype': 'd', 'units': {'mks': "second"}},
@@ -705,8 +712,6 @@ GPS99 = Message({
         {'key': "spare",                'stype': 'H'},
     ]
 })
-
-
 
 
 # A list of all message types we know about

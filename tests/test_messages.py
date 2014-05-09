@@ -164,25 +164,23 @@ typedef struct {
         self.assertEqual(len(dupes), 0)
 
     def test_header_encode(self):
-        h = messages.Head()
-        raw = h.encode(messages.ADIS, 0)
+        raw = messages.Head.encode(messages.ADIS, 0)
         self.assertEqual(raw, b'ADIS\x00\x00\x00\x00\x00\x00\x00\x18')
 
-        raw = h.encode(messages.ADIS, 1)
+        raw = messages.Head.encode(messages.ADIS, 1)
         self.assertEqual(raw, b'ADIS\x00\x00\x00\x00\x00\x01\x00\x18')
 
-        raw = h.encode(messages.ADIS, 226345)
+        raw = messages.Head.encode(messages.ADIS, 226345)
         self.assertEqual(raw, b'ADIS\x00\x00\x00\x03t)\x00\x18')
 
     def test_header_decode(self):
-        h = messages.Head()
-        info = h.decode(b'ADIS\x00\x00\x00\x00\x00\x00\x00\x18')
+        info = messages.Head.decode(b'ADIS\x00\x00\x00\x00\x00\x00\x00\x18')
         self.assertEqual(info, {'fourcc': b'ADIS', 'timestamp': 0, 'length': 24})
 
-        info = h.decode(b'ADIS\x00\x00\x00\x00\x00\x01\x00\x18')
+        info = messages.Head.decode(b'ADIS\x00\x00\x00\x00\x00\x01\x00\x18')
         self.assertEqual(info, {'fourcc': b'ADIS', 'timestamp': 1, 'length': 24})
 
-        info = h.decode(b'ADIS\x00\x00\x00\x0b\x7fn\x00\x18')
+        info = messages.Head.decode(b'ADIS\x00\x00\x00\x0b\x7fn\x00\x18')
         self.assertEqual(info, {'fourcc': b'ADIS', 'timestamp': 753518, 'length': 24})
 
     def tearDown(self):
