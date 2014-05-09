@@ -18,3 +18,4 @@ Contents:
    packet
    api
    network
+   examples
