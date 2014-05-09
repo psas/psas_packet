@@ -128,6 +128,8 @@ class Message(object):
                 struct_string += m['stype']
             self.struct = struct.Struct(struct_string)
 
+        self.size = self.struct.size
+
     def __repr__(self):
         return "{0} message type".format(self.name)
 
@@ -222,6 +224,16 @@ class Message(object):
 
 
 # Here we define known PSAS message types:
+SEQN = Message({
+    'name': "SequenceNo",
+    'fourcc': b'SEQN',
+    'size': "Fixed",
+    'endianness': '!',
+    'members': [
+        {'key': "Sequence", 'stype': "L"},
+    ]
+})
+
 ADIS = Message({
     'name': "ADIS16405",
     'fourcc': b'ADIS',
@@ -716,6 +728,7 @@ GPS99 = Message({
 
 # A list of all message types we know about
 PSAS_MESSAGES = [
+    SEQN,
     ADIS,
     ROLL,
     LTC,
