@@ -11,7 +11,7 @@ PSAS = {cls.fourcc: cls for cls in messages.PSAS_MESSAGES}
 output = {cls.fourcc: [] for cls in messages.PSAS_MESSAGES}
 
 
-parser = argparse.ArgumentParser(prog='gen-psas-types')
+parser = argparse.ArgumentParser(prog='log2csv')
 parser.add_argument('-i', '--input', type=argparse.FileType('r'),
                     help="log file to read")
 args = vars(parser.parse_args())
@@ -56,9 +56,10 @@ finally:
     f_in.close()
 
 for key, data in output.items():
-    with open(str(messages.printable(key))+'.csv', 'w') as f_out:
-        for line in data:
-            for v in line:
-                f_out.write(str(v))
-                f_out.write(',')
-            f_out.write('\n')
+    if len(data) > 0:
+        with open(str(messages.printable(key))+'.csv', 'w') as f_out:
+            for line in data:
+                for v in line:
+                    f_out.write(str(v))
+                    f_out.write(',')
+                f_out.write('\n')
