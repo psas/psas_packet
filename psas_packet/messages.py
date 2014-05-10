@@ -266,6 +266,47 @@ ROLL = Message({
     ]
 })
 
+RNHH = Message({
+    'name': "RNHHealth",
+    'fourcc': b'RNHH',
+    'size': "Fixed",
+    'endianness': '!',
+    'members': [
+        {'key': "Temperature",          'stype': "H", 'units': {'mks': "kelvin",    'scaleby': 0.1}},
+        {'key': "TS1Temperature",       'stype': "h", 'units': {'mks': "degree c",  'scaleby': 0.1}},
+        {'key': "TS2Temperature",       'stype': "h", 'units': {'mks': "degree c",  'scaleby': 0.1}},
+        {'key': "TempRange",            'stype': "H"},
+        {'key': "Voltage",              'stype': "H", 'units': {'mks': "volt",      'scaleby': 0.001}},
+        {'key': "Current",              'stype': "h", 'units': {'mks': "amp",       'scaleby': 0.001}},
+        {'key': "AverageCurrent",       'stype': "h", 'units': {'mks': "amp",       'scaleby': 0.001}},
+        {'key': "CellVoltage1",         'stype': "H", 'units': {'mks': "volt",      'scaleby': 0.001}},
+        {'key': "CellVoltage2",         'stype': "H", 'units': {'mks': "volt",      'scaleby': 0.001}},
+        {'key': "CellVoltage3",         'stype': "H", 'units': {'mks': "volt",      'scaleby': 0.001}},
+        {'key': "CellVoltage4",         'stype': "H", 'units': {'mks': "volt",      'scaleby': 0.001}},
+        {'key': "PackVoltage",          'stype': "H", 'units': {'mks': "volt",      'scaleby': 0.001}},
+        {'key': "AverageVoltage",       'stype': "H", 'units': {'mks': "volt",      'scaleby': 0.001}},
+    ]
+})
+
+
+RNHP = Message({
+    'name': "RNHPower",
+    'fourcc': b'RNHP',
+    'size': "Fixed",
+    'endianness': '!',
+    'members': [
+        {'key': "Port1", 'stype': "H", 'units': {'mks': 'amp', 'scaleby': (3.3/2.0**12) * (63000.0/69800.0))}},
+        {'key': "Port2", 'stype': "H", 'units': {'mks': 'amp', 'scaleby': (3.3/2.0**12) * (63000.0/69800.0))}},
+        {'key': "Port3", 'stype': "H", 'units': {'mks': 'amp', 'scaleby': (3.3/2.0**12) * (63000.0/69800.0))}},
+        {'key': "Port4", 'stype': "H", 'units': {'mks': 'amp', 'scaleby': (3.3/2.0**12) * (63000.0/69800.0)}},
+        {'key': "Port5", 'stype': "H", 'units': {'mks': 'amp', 'scaleby': (3.3/2.0**12) * (63000.0/69800.0)}},
+        {'key': "Port6", 'stype': "H", 'units': {'mks': 'amp', 'scaleby': (3.3/2.0**12) * (63000.0/69800.0)}},
+        {'key': "Port7", 'stype': "H", 'units': {'mks': 'amp', 'scaleby': (3.3/2.0**12) * (63000.0/69800.0)}},
+        {'key': "Port8", 'stype': "H", 'units': {'mks': 'amp', 'scaleby': (3.3/2.0**12) * (63000.0/69800.0)}},
+    ]
+})
+
+
 LTC = Message({
     'name': "LaunchTowerComputer",
     'fourcc': b'LTCH',
@@ -731,6 +772,8 @@ PSAS_MESSAGES = [
     SEQN,
     ADIS,
     ROLL,
+    RNHH,
+    RNHP,
     LTC,
     GPS1,
     GPS2,

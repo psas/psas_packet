@@ -8,7 +8,7 @@ except ImportError:
 
 setup(
     name='psas_packet',
-    version='0.1.5',
+    version='0.1.6',
     description='serializer for PSAS data standards',
     long_description=open('README.rst').read(),
     author='Nathan Bergey',
@@ -20,6 +20,7 @@ setup(
     install_requires=[],
     scripts=[
         'scripts/gen-psas-types',
+        'scripts/log2csv',
     ],
     license=open('LICENSE').read(),
     zip_safe=False,
