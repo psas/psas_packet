@@ -295,9 +295,9 @@ RNHP = Message({
     'size': "Fixed",
     'endianness': '!',
     'members': [
-        {'key': "Port1", 'stype': "H", 'units': {'mks': 'amp', 'scaleby': (3.3/2.0**12) * (63000.0/69800.0))}},
-        {'key': "Port2", 'stype': "H", 'units': {'mks': 'amp', 'scaleby': (3.3/2.0**12) * (63000.0/69800.0))}},
-        {'key': "Port3", 'stype': "H", 'units': {'mks': 'amp', 'scaleby': (3.3/2.0**12) * (63000.0/69800.0))}},
+        {'key': "Port1", 'stype': "H", 'units': {'mks': 'amp', 'scaleby': (3.3/2.0**12) * (63000.0/69800.0)}},
+        {'key': "Port2", 'stype': "H", 'units': {'mks': 'amp', 'scaleby': (3.3/2.0**12) * (63000.0/69800.0)}},
+        {'key': "Port3", 'stype': "H", 'units': {'mks': 'amp', 'scaleby': (3.3/2.0**12) * (63000.0/69800.0)}},
         {'key': "Port4", 'stype': "H", 'units': {'mks': 'amp', 'scaleby': (3.3/2.0**12) * (63000.0/69800.0)}},
         {'key': "Port5", 'stype': "H", 'units': {'mks': 'amp', 'scaleby': (3.3/2.0**12) * (63000.0/69800.0)}},
         {'key': "Port6", 'stype': "H", 'units': {'mks': 'amp', 'scaleby': (3.3/2.0**12) * (63000.0/69800.0)}},
