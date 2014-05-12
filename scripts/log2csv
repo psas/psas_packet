@@ -62,12 +62,13 @@ finally:
 for key, data in output.items():
     if len(data) > 0:
         with open(str(messages.printable(key))+'.csv', 'w') as f_out:
-            f_out.write('# [0] SEQN, [1] timestamp, ')
+            f_out.write('# [0] SEQN, [1] timestamp')
             for i, member in enumerate(PSAS[key].member_list):
-                f_out.write("[{0}] {1}, ".format(i+2, member['key']))
+                f_out.write(", [{0}] {1}".format(i+2, member['key']))
             f_out.write('\n')
             for line in data:
-                for v in line:
+                for i, v in enumerate(line):
                     f_out.write(str(v))
-                    f_out.write(',')
+                    if i < (len(line)-1):
+                        f_out.write(',')
                 f_out.write('\n')
