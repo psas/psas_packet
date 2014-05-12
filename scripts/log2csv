@@ -12,8 +12,7 @@ output = {cls.fourcc: [] for cls in messages.PSAS_MESSAGES}
 
 
 parser = argparse.ArgumentParser(prog='log2csv')
-parser.add_argument('-i', '--input', type=argparse.FileType('r'),
-                    help="log file to read")
+parser.add_argument('-i', '--input', type=argparse.FileType('rb'), help="log file to read")
 args = vars(parser.parse_args())
 
 f_in = args['input']
@@ -35,8 +34,8 @@ try:
                 line.append(info['timestamp'])
                 try:
                     unpacked = message_cls.decode(chunk[:message_cls.size])
-                    for key, v in unpacked.items():
-                        line.append(v)
+                    for memeber in message_cls.member_list:
+                        line.append(unpacked[memeber['key']])
                     chunk = chunk[message_cls.size:]
                 except messages.MessageSizeError as e:
                     print("Message size", str(info), str(e))
@@ -58,6 +57,10 @@ finally:
 for key, data in output.items():
     if len(data) > 0:
         with open(str(messages.printable(key))+'.csv', 'w') as f_out:
+            f_out.write('# timestamps, ')
+            for member in PSAS[key].member_list:
+                f_out.write(member['key']+', ')
+            f_out.write('\n')
             for line in data:
                 for v in line:
                     f_out.write(str(v))
