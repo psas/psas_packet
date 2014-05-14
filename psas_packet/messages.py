@@ -289,14 +289,13 @@ RNHH = Message({
 })
 
 # ADC scale for power measuremnets
-#_rnhpscale = (3.3/2.0**12) * (63000.0/69800.0)
-_rnhpscale = 1.0
+_rnhpscale = (3.3/2**12) * (63000.0/69800.0)
 
 RNHP = Message({
     'name': "RNHPower",
     'fourcc': b'RNHP',
     'size': "Fixed",
-    'endianness': '!',
+    'endianness': '<',
     'members': [
         {'key': "Port1", 'stype': "H", 'units': {'mks': 'amp', 'scaleby': _rnhpscale}},
         {'key': "Port2", 'stype': "H", 'units': {'mks': 'amp', 'scaleby': _rnhpscale}},
