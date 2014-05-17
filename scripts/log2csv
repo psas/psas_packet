@@ -2,73 +2,38 @@
 # -*- coding: utf-8 -*-
 from __future__ import print_function
 import argparse
-import sys
+from psas_packet import io
 from psas_packet import messages
 
-chunksize = 100000000 # 100 MB
-
 PSAS = {cls.fourcc: cls for cls in messages.PSAS_MESSAGES}
-output = {cls.fourcc: [] for cls in messages.PSAS_MESSAGES}
-
 
 parser = argparse.ArgumentParser(prog='log2csv')
-parser.add_argument('-i', '--input', type=argparse.FileType('rb'), help="log file to read")
+parser.add_argument('logfile', type=argparse.FileType('rb'), help="log file to read")
 args = vars(parser.parse_args())
 
-f_in = args['input']
+f_in = args['logfile']
 
-# Current sequence number
-seq = 0
+files = {}
+with io.BinFile(f_in) as log:
+    seq = 0
+    for data in log.read():
+        for key in data:
+            if key in PSAS:
 
-try:
-    chunk = f_in.read(chunksize)
-    while chunk != "":
+                if key not in files:
+                    files[key] = open(str(messages.printable(key))+'.csv', 'w')
+                    files[key].write("[0]SEQN, [1]Timestamp")
+                    for i, member in enumerate(PSAS[key].member_list):
+                        files[key].write(", [{0}]{1}".format(i+2, member['key']))
+                    files[key].write('\n')
 
+                values = data[key]
 
-        while len(chunk) > 0:
-            # Read header:
-            info = messages.Head.decode(chunk[:messages.Head.size()])
-            chunk = chunk[messages.Head.size():]
+                if key == 'SEQN':
+                    seq = values['Sequence']
 
-            message_cls = PSAS.get(info['fourcc'], None)
-            if message_cls is not None:
-                line = []
-                try:
-                    unpacked = message_cls.decode(chunk[:message_cls.size])
-                    if info['fourcc'] == b'SEQN':
-                        seq = unpacked['Sequence']
-                    line.append(seq)
-                    line.append(info['timestamp'])
-                    for memeber in message_cls.member_list:
-                        line.append(unpacked[memeber['key']])
-                    chunk = chunk[message_cls.size:]
-                except messages.MessageSizeError as e:
-                    print("Message size", str(info), str(e))
-                    chunk = chunk[info['length']:]
-                except:
-                    print("message read error", str(info))
-                    chunk = chunk[info['length']:]
-                output[info['fourcc']].append(line)
-            else:
-                print("unknown header ", info)
-                chunk = chunk[info['length']:]
-
-
-        chunk = f_in.read(chunksize)
-
-finally:
-    f_in.close()
-
-for key, data in output.items():
-    if len(data) > 0:
-        with open(str(messages.printable(key))+'.csv', 'w') as f_out:
-            f_out.write('# [0] SEQN, [1] timestamp')
-            for i, member in enumerate(PSAS[key].member_list):
-                f_out.write(", [{0}] {1}".format(i+2, member['key']))
-            f_out.write('\n')
-            for line in data:
-                for i, v in enumerate(line):
-                    f_out.write(str(v))
-                    if i < (len(line)-1):
-                        f_out.write(',')
+                f_out = files[key]
+                f_out.write(str(seq)+","+str(values['timestamp']))
+                for member in PSAS[key].member_list:
+                    f_out.write(","+str(values[member['key']]))
                 f_out.write('\n')

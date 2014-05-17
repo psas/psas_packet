@@ -73,8 +73,7 @@ class BinFile(object):
         self.fh.close()
 
     def read(self):
-
-        buff = self.fh.read(4096)
+        buff = self.fh.read(1<<20) # 1 MB
 
         while buff != b'':
             try:
@@ -82,4 +81,4 @@ class BinFile(object):
                 buff = buff[bytes_read:]
                 yield data
             except (BlockSize):
-                buff += self.fh.read(4096)
+                buff += self.fh.read(1<<20)
