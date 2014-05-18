@@ -1,14 +1,13 @@
-===========
-Packets API
-===========
+===============
+psas_packet API
+===============
 
 Message Class
 =============
 
-A single Message is of type Message. A message class can be used on its own
-to decode and encode data, or to get a c code typddef for a message of the
-same type
-
+The message class can be initialized with information about the data that can
+be packed in it. This will make an object with encode and decode methods
+available for packing and unpacking.
 
 .. autoclass:: psas_packet.messages.Message
    :members: encode, decode, typedef
