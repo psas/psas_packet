@@ -9,46 +9,51 @@ from psas_packet import messages
 PSAS = {cls.fourcc: cls for cls in messages.PSAS_MESSAGES}
 HEAD = messages.Head()
 
-parser = argparse.ArgumentParser(prog='log2csv')
-parser.add_argument('logfile', type=argparse.FileType('rb'), help="Log file to read")
-parser.add_argument('slice', type=str, help="slice")
-parser.add_argument('output', type=argparse.FileType('wb'), help="Output File")
+def slicelog(begin, end, inlog, outlog):
+    with io.BinFile(inlog) as log:
+        seq = 0
+        for data in log.read():
+            for key in data:
 
-args = vars(parser.parse_args())
+                # scan sequnce numbers
+                if key == 'SEQN':
+                    seq = data[key]['Sequence']
 
-begin, end = args['slice'].split(':')
-try:
-    begin = int(begin)
-except:
-    begin = 0
-try:
-    end = int(end)
-except:
-    end = sys.maxint
+                # as long as we're after the begin number
+                if seq > (begin-1):
+                    if seq > end:
+                        break # but not too far!!
 
-with io.BinFile(args['logfile']) as log:
-    seq = 0
-    for data in log.read():
-        for key in data:
+                    # copy log
+                    if key in PSAS:
+                        msg = PSAS[key]
+                        outlog.write(HEAD.encode(msg, data[key]['timestamp']))
+                        outlog.write(msg.encode(data[key]))
 
-            # scan sequnce numbers
-            if key == 'SEQN':
-                seq = data[key]['Sequence']
-
-            # as long as we're after the begin number
-            if seq > (begin-1):
-                if seq > end:
-                    break # but not too far!!
-
-                # copy log
-                if key in PSAS:
-                    msg = PSAS[key]
-                    args['output'].write(HEAD.encode(msg, data[key]['timestamp']))
-                    args['output'].write(msg.encode(data[key]))
-
-        # break out of inner loop
+            # break out of inner loop
+            else:
+                continue
+            break
         else:
-            continue
-        break
-    else:
-        print("No break")
+            print("No break")
+
+
+if __name__ == '__main__':
+    parser = argparse.ArgumentParser(prog='log2csv')
+    parser.add_argument('logfile', type=argparse.FileType('rb'), help="Log file to read")
+    parser.add_argument('slice', type=str, help="slice")
+    parser.add_argument('output', type=argparse.FileType('wb'), help="Output File")
+
+    args = vars(parser.parse_args())
+
+    begin, end = args['slice'].split(':')
+    try:
+        begin = int(begin)
+    except:
+        begin = 0
+    try:
+        end = int(end)
+    except:
+        end = sys.maxint
+
+    slicelog(begin, end, args['logfile'], args['output'])
