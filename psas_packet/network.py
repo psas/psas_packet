@@ -2,7 +2,7 @@
 """Network stack for exchanging packets with messages.
 """
 import socket
-import time
+
 
 class SendUDP(object):
     """UDP socket sender context
@@ -37,7 +37,7 @@ class SendUDP(object):
     def close(self):
         """Release the socket
         """
-        self.socket.close()        
+        self.socket.close()
 
     def send_message(self, msgtype, data):
         """Send message over socket. Does the packing for you.
