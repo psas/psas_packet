@@ -148,7 +148,9 @@ class Message(object):
 
         # Lookup corresponding metadata
         for key, value in data.items():
-            m = self.member_dict[key]
+            m = self.member_dict.get(key, None)
+            if m is None:
+                continue
             units = m['units']
 
             # from native units to packed representation

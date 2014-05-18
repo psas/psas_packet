@@ -21,6 +21,7 @@ setup(
     scripts=[
         'scripts/gen-psas-types',
         'scripts/log2csv',
+        'scripts/slicelog',
     ],
     license=open('LICENSE').read(),
     zip_safe=False,
