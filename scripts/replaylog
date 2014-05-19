@@ -5,6 +5,7 @@ from __future__ import print_function
 import argparse
 import struct
 import time
+import sys
 from psas_packet import io
 from psas_packet import messages
 from psas_packet import network
@@ -40,6 +41,8 @@ def replay(log):
                                 if wait_time > 0:
                                     time.sleep(wait_time)
                                 udp.send_raw(buff)
+                                sys.stdout.write("  Sequence No.: {0}\r".format(seq))
+                                sys.stdout.flush()
                                 #print(cur_seq, len(buff), packet_delay, real_delay, wait_time)
                                 last_pack_sent = time.time()
                             
@@ -67,10 +70,10 @@ def replay(log):
         if wait_time > 0:
             time.sleep(wait_time)
         udp.send_raw(buff)
-
+        sys.stdout.write("  Sequence No.: {0}\n".format(seq))
         #print(cur_seq, len(buff), packet_delay, real_delay, wait_time)
 
-
+    print("EOF")
 
 
 if __name__ == '__main__':
