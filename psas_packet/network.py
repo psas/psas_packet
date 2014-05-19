@@ -3,6 +3,9 @@
 """
 import socket
 
+TELEMETRY_IP = "127.0.0.1"
+TELEMETRY_PORT = 35001
+
 
 class SendUDP(object):
     """UDP socket sender context
@@ -47,6 +50,17 @@ class SendUDP(object):
 
         """
         self.socket.send(msgtype.encode(data))
+
+    def send_raw(self, raw):
+        """Send raw bytes using this connection
+
+        :param raw bytes: bytes to send
+
+        """
+        try:
+            self.socket.send(raw)
+        except:
+            pass
 
 
 class ListenUDP(object):

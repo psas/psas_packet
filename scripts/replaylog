@@ -1,0 +1,82 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+
+from __future__ import print_function
+import argparse
+import struct
+import time
+from psas_packet import io
+from psas_packet import messages
+from psas_packet import network
+
+PSAS = {cls.fourcc: cls for cls in messages.PSAS_MESSAGES}
+HEAD = messages.Head()
+
+def replay(log):
+
+    with network.SendUDP(network.TELEMETRY_IP, network.TELEMETRY_PORT) as udp:
+
+        with io.BinFile(log) as log:
+            seq = 0
+            cur_seq = -1
+            file_time = 0
+            last_seq_time = 0
+            now = time.time()
+            last_pack_sent = 0
+            buff = b''
+            for data in log.read():
+                for key in data:
+
+                    # scan sequnce numbers
+                    if key == 'SEQN':
+                        seq = data[key]['Sequence']
+                        if seq != cur_seq:
+                            # Wait and send
+                            if len(buff) > 0:
+                                now = time.time()
+                                packet_delay = (file_time - last_seq_time)/1e9
+                                real_delay = now - last_pack_sent
+                                wait_time = packet_delay - real_delay
+                                if wait_time > 0:
+                                    time.sleep(wait_time)
+                                udp.send_raw(buff)
+                                #print(cur_seq, len(buff), packet_delay, real_delay, wait_time)
+                                last_pack_sent = time.time()
+                            
+                            # reset
+                            last_seq_time = file_time
+                            buff = b''
+                            buff += struct.pack('!L', seq)
+                            cur_seq = seq
+
+
+                    else:
+                        # copy log
+                        if key in PSAS:
+                            msg = PSAS[key]
+                            dat = data[key]
+                            buff += HEAD.encode(msg, data[key]['timestamp'])
+                            buff += msg.encode(data[key])
+                            file_time = data[key]['timestamp']
+
+        # flush last packet
+        now = time.time()
+        packet_delay = (file_time - last_seq_time)/1e9
+        real_delay = now - last_pack_sent
+        wait_time = packet_delay - real_delay
+        if wait_time > 0:
+            time.sleep(wait_time)
+        udp.send_raw(buff)
+
+        #print(cur_seq, len(buff), packet_delay, real_delay, wait_time)
+
+
+
+
+if __name__ == '__main__':
+    parser = argparse.ArgumentParser(prog='replaylog')
+    parser.add_argument('logfile', type=argparse.FileType('rb'), help="Log file to read")
+
+    args = vars(parser.parse_args())
+
+    replay(args['logfile'])
