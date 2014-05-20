@@ -297,7 +297,7 @@ RNHP = Message({
     'name': "RNHPower",
     'fourcc': b'RNHP',
     'size': "Fixed",
-    'endianness': '<',
+    'endianness': '!',
     'members': [
         {'key': "Port1", 'stype': "H", 'units': {'mks': 'amp', 'scaleby': _rnhpscale}},
         {'key': "Port2", 'stype': "H", 'units': {'mks': 'amp', 'scaleby': _rnhpscale}},
