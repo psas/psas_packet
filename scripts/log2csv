@@ -17,7 +17,7 @@ def log2csv(f_in):
 
                     if key not in files:
                         files[key] = open(str(messages.printable(key))+'.csv', 'w')
-                        files[key].write("[0]SEQN, [1]Timestamp")
+                        files[key].write("# [0]SEQN, [1]Timestamp")
                         for i, member in enumerate(PSAS[key].member_list):
                             files[key].write(", [{0}]{1}".format(i+2, member['key']))
                         files[key].write('\n')
