@@ -57,10 +57,16 @@ def decode_block(block):
 
 
 class BinFile(object):
+    """Read from a binary log file
+
+    :param fname: A filename or file-like object
+    :returns: BinFile object
+
+    """
 
     def __init__(self, fname):
 
-        # Try and see if the passed in file is filename (string?) or an object that might act like a file
+        # Try and see if the passed in file is filename (string) or an object that might act like a file
         if _is_string_like(fname):
             self.fh = open(fname, 'rb')
         else:
@@ -73,12 +79,25 @@ class BinFile(object):
         self.fh.close()
 
     def read(self):
+        """Read the file and return data inside it
+        """
+
+        # Read a chunk of file
         buff = self.fh.read(1 << 20)  # 1 MB
 
+        # As long as we have something to look at
         while buff != b'':
             try:
                 bytes_read, data = decode_block(buff)
                 buff = buff[bytes_read:]
+                # Our buffer got too small, read some more from the file
+                # All messages start with a fourcc, so if there isn't at leas 4 bytes we've lost.
+                if len(buff) < 4:
+                    buff += self.fh.read(1 << 20)  # 1 MB
                 yield data
             except (BlockSize):
-                buff += self.fh.read(1 << 20)  # 1 MB
+                b = self.fh.read(1 << 20)  # 1 MB
+                # Check that we didn't actually hit the end of the file
+                if b == b'':
+                    break
+                buff += b
