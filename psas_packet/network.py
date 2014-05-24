@@ -49,7 +49,10 @@ class SendUDP(object):
         :param dict data: Data to get packed and sent
 
         """
-        self.socket.send(msgtype.encode(data))
+        try:
+            self.socket.send(msgtype.encode(data))
+        except:
+            pass
 
     def send_raw(self, raw):
         """Send raw bytes using this connection

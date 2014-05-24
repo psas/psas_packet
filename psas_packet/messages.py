@@ -333,6 +333,43 @@ LTC = Message({
     ]
 })
 
+FCFH = Message({
+    'name': "FCFHealth",
+    'fourcc': b'FCFH',
+    'size': "Fixed",
+    'endianness': '!',
+    'members': [
+        {'key': "CPU_User",                     'stype': 'f'},
+        {'key': "CPU_System",                   'stype': 'f'},
+        {'key': "CPU_Nice",                     'stype': 'f'},
+        {'key': "CPU_IOWait",                   'stype': 'f'},
+        {'key': "CPU_IRQ",                      'stype': 'f'},
+        {'key': "CPU_SoftIRQ",                  'stype': 'f'},
+        {'key': "RAM_Used",                     'stype': 'Q'},
+        {'key': "RAM_Buffer",                   'stype': 'Q'},
+        {'key': "RAM_Cached",                   'stype': 'Q'},
+        {'key': "PID",                          'stype': 'H'},
+        {'key': "Disk_Used",                    'stype': 'Q'},
+        {'key': "Disk_Read",                    'stype': 'Q'},
+        {'key': "Disk_Write",                   'stype': 'Q'},
+        {'key': "IO_lo_Bytes_Sent",             'stype': 'L'},
+        {'key': "IO_lo_Bytes_Recv",             'stype': 'L'},
+        {'key': "IO_lo_Packets_Sent",           'stype': 'L'},
+        {'key': "IO_lo_Packets_Recv",           'stype': 'L'},
+        {'key': "IO_eth0_Bytes_Sent",           'stype': 'L'},
+        {'key': "IO_eth0_Bytes_Recv",           'stype': 'L'},
+        {'key': "IO_eth0_Packets_Sent",         'stype': 'L'},
+        {'key': "IO_eth0_Packets_Recv",         'stype': 'L'},
+        {'key': "IO_wlan0_Bytes_Sent",          'stype': 'L'},
+        {'key': "IO_wlan0_Bytes_Recv",          'stype': 'L'},
+        {'key': "IO_wlan0_Packets_Sent",        'stype': 'L'},
+        {'key': "IO_wlan0_Packets_Recv",        'stype': 'L'},
+        {'key': "Core_Temp",                    'stype': 'H'},
+    ]
+})
+
+
+
 
 GPS1 = Message({
     'name': "GPSFix",
