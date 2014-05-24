@@ -311,28 +311,6 @@ RNHP = Message({
 })
 
 
-LTC = Message({
-    'name': "LaunchTowerComputer",
-    'fourcc': b'LTCH',
-    'size': "Fixed",
-    'endianness': '!',
-    'members': [
-        {'key': "Rocket_Ready",                  'stype': "f", 'units': {'mks': "volt"}},
-        {'key': "Iginition_Relay",               'stype': "B"},
-        {'key': "Ignition_Battery",              'stype': "f", 'units': {'mks': "volt"}},
-        {'key': "Shore_Power_Relay",             'stype': "B"},
-        {'key': "Shore_Power",                   'stype': "f", 'units': {'mks': "volt"}},
-        {'key': "Solar_Voltage",                 'stype': "f", 'units': {'mks': "volt"}},
-        {'key': "System_Battery",                'stype': "f", 'units': {'mks': "volt"}},
-        {'key': "Internal_Temp",                 'stype': "f", 'units': {'mks': "celsius"}},
-        {'key': "External_Temp",                 'stype': "f", 'units': {'mks': "celsius"}},
-        {'key': "Humidity",                      'stype': "f"},
-        {'key': "Wind_Speed",                    'stype': "f"},
-        {'key': "Wind_Direction",                'stype': "f"},
-        {'key': "Barometric_Pressure",           'stype': "f"}
-    ]
-})
-
 FCFH = Message({
     'name': "FCFHealth",
     'fourcc': b'FCFH',
@@ -369,6 +347,27 @@ FCFH = Message({
 })
 
 
+LTC = Message({
+    'name': "LaunchTowerComputer",
+    'fourcc': b'LTCH',
+    'size': "Fixed",
+    'endianness': '!',
+    'members': [
+        {'key': "Rocket_Ready",                  'stype': "f", 'units': {'mks': "volt"}},
+        {'key': "Iginition_Relay",               'stype': "B"},
+        {'key': "Ignition_Battery",              'stype': "f", 'units': {'mks': "volt"}},
+        {'key': "Shore_Power_Relay",             'stype': "B"},
+        {'key': "Shore_Power",                   'stype': "f", 'units': {'mks': "volt"}},
+        {'key': "Solar_Voltage",                 'stype': "f", 'units': {'mks': "volt"}},
+        {'key': "System_Battery",                'stype': "f", 'units': {'mks': "volt"}},
+        {'key': "Internal_Temp",                 'stype': "f", 'units': {'mks': "celsius"}},
+        {'key': "External_Temp",                 'stype': "f", 'units': {'mks': "celsius"}},
+        {'key': "Humidity",                      'stype': "f"},
+        {'key': "Wind_Speed",                    'stype': "f"},
+        {'key': "Wind_Direction",                'stype': "f"},
+        {'key': "Barometric_Pressure",           'stype': "f"}
+    ]
+})
 
 
 GPS1 = Message({
@@ -429,7 +428,7 @@ GPS93 = Message({
     'members': [
         {'key': "SV",                   'stype': 'H'},
         {'key': "spare",                'stype': 'H'},
-        {'key': "TOW_Sec-of-Week",      'stype': 'L'},
+        {'key': "TOW_Sec_of_Week",      'stype': 'L'},
         {'key': "IODE",                 'stype': 'H'},
         {'key': "URA",                  'stype': 'H'},
         {'key': "T_Zero",               'stype': 'l'},
@@ -815,6 +814,7 @@ PSAS_MESSAGES = [
     ROLL,
     RNHH,
     RNHP,
+    FCFH,
     LTC,
     GPS1,
     GPS2,

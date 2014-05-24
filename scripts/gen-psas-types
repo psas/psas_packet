@@ -29,4 +29,6 @@ for message in messages.PSAS_MESSAGES:
     output.write(message.typedef())
     output.write('\n\n')
 
+output.write("\n#endif\n")
+
 output.close()
