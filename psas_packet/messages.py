@@ -202,7 +202,7 @@ class Message(object):
         for line in self.member_list:
             stype = line['stype']
 
-            var = "{0}_{1}".format(printable(self.fourcc).lower(), line['key'].lower())
+            var = line['key'].lower()
 
             if 's' in stype:
                 ctype = 'char'
@@ -292,7 +292,7 @@ RNHH = Message({
 
 # ADC scale for power measuremnets
 _rnhpscale = (3.3/2**12) * (63000.0/69800.0)
-
+_rnhumbscale = (3.3/2**12)
 RNHP = Message({
     'name': "RNHPower",
     'fourcc': b'RNHP',
@@ -303,7 +303,7 @@ RNHP = Message({
         {'key': "Port2", 'stype': "H", 'units': {'mks': 'amp', 'scaleby': _rnhpscale}},
         {'key': "Port3", 'stype': "H", 'units': {'mks': 'amp', 'scaleby': _rnhpscale}},
         {'key': "Port4", 'stype': "H", 'units': {'mks': 'amp', 'scaleby': _rnhpscale}},
-        {'key': "Port5", 'stype': "H", 'units': {'mks': 'amp', 'scaleby': _rnhpscale}},
+        {'key': "Umbilical", 'stype': "H", 'units': {'mks': 'amp', 'scaleby': _rnhumbscale}},
         {'key': "Port6", 'stype': "H", 'units': {'mks': 'amp', 'scaleby': _rnhpscale}},
         {'key': "Port7", 'stype': "H", 'units': {'mks': 'amp', 'scaleby': _rnhpscale}},
         {'key': "Port8", 'stype': "H", 'units': {'mks': 'amp', 'scaleby': _rnhpscale}},
