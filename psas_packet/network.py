@@ -2,6 +2,7 @@
 """Network stack for exchanging packets with messages.
 """
 import socket
+import struct
 
 TELEMETRY_IP = "127.0.0.1"
 TELEMETRY_PORT = 35001
@@ -51,6 +52,21 @@ class SendUDP(object):
         """
         try:
             self.socket.send(msgtype.encode(data))
+        except:
+            pass
+
+    def send_seq_message(self, msgtype, seq, data):
+        """Send message with a sequence number header over a socket. Does the packing for you.
+
+        :param Message msgtype: Message class to use for packing, see: psas_packet.messages
+        :param int seq: Sequence number
+        :param dict data: Data to get packed and sent
+
+        """
+        try:
+            packed = msgtype.encode(data)
+            s = struct.pack('!L', seq)
+            self.socket.send(s + packed)
         except:
             pass
 

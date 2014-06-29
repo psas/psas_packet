@@ -107,18 +107,18 @@ class TestMessages(unittest.TestCase):
  * ADIS16405 Data
  */
 typedef struct {
-	uint16_t adis_vcc;
-	int16_t adis_gyro_x;
-	int16_t adis_gyro_y;
-	int16_t adis_gyro_z;
-	int16_t adis_acc_x;
-	int16_t adis_acc_y;
-	int16_t adis_acc_z;
-	int16_t adis_magn_x;
-	int16_t adis_magn_y;
-	int16_t adis_magn_z;
-	int16_t adis_temp;
-	uint16_t adis_aux_adc;
+	uint16_t vcc;
+	int16_t gyro_x;
+	int16_t gyro_y;
+	int16_t gyro_z;
+	int16_t acc_x;
+	int16_t acc_y;
+	int16_t acc_z;
+	int16_t magn_x;
+	int16_t magn_y;
+	int16_t magn_z;
+	int16_t temp;
+	uint16_t aux_adc;
 } __attribute__((packed)) ADIS16405Data;
 
 typedef struct {
@@ -137,10 +137,10 @@ typedef struct {
  * GPSWAASMessage Data
  */
 typedef struct {
-	uint16_t gps80_prn;
-	uint16_t gps80_spare;
-	uint32_t gps80_msg_sec_of_week;
-	char gps80_waas_msg[32];
+	uint16_t prn;
+	uint16_t spare;
+	uint32_t msg_sec_of_week;
+	char waas_msg[32];
 } __attribute__((packed)) GPSWAASMessageData;
 
 typedef struct {
