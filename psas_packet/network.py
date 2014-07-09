@@ -92,7 +92,7 @@ class ListenUDP(object):
 
         self.socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         self.socket.bind((self.bind_addr, self.listen_port))
-        self.socket.settimeout(0.01)
+        self.socket.settimeout(1)
 
     def __enter__(self):
         return self

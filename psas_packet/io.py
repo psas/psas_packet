@@ -47,14 +47,40 @@ def decode_block(block):
     # figure out what type it is based on FOURCC, and get that message class
     message_cls = PSAS.get(info['fourcc'], None)
 
+    if message_cls is None:
+        print("Unknown header!", info['fourcc'])
+        return HEADER.size + info['length'], {'fourcc': info['fourcc']}
+        
     # Yay! We know about this type, lets unpack it
-    if message_cls is not None:
-        if len(block) < HEADER.size+message_cls.size:
-            raise(BlockSize)
-            return
-        unpacked = message_cls.decode(block[HEADER.size:HEADER.size+message_cls.size])
-        return HEADER.size+message_cls.size, {info['fourcc']: dict({'timestamp': info['timestamp']}, **unpacked)}
+    if len(block) < HEADER.size+message_cls.size:
+        raise(BlockSize)
+        return
+    unpacked = message_cls.decode(block[HEADER.size:HEADER.size+message_cls.size])
+    return HEADER.size+message_cls.size, {info['fourcc']: dict({'timestamp': info['timestamp']}, **unpacked)}
 
+
+class Network(object):
+
+    def __init__(self, listener):
+        self.listener = listener
+
+    def listen(self):
+        with self.listener(35001) as listen:
+            buff = listen.listen()
+            if buff is not None:
+                seq = 0
+                for i, b in enumerate(buff[:4]):
+                    seq = seq + (ord(b) << (3-i))
+                yield seq
+                buff = buff[4:]
+                entries = []
+                while buff != '':
+                    try:
+                        bytes_read, data = decode_block(buff)
+                        buff = buff[bytes_read:]
+                        yield data
+                    except:
+                        pass
 
 class BinFile(object):
     """Read from a binary log file
@@ -101,3 +127,6 @@ class BinFile(object):
                 if b == b'':
                     break
                 buff += b
+            except:
+                #print(buff[:100])
+                pass
