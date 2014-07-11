@@ -58,3 +58,6 @@ class TestNetworkRecieve(unittest.TestCase):
 
     def tearDown(self):
         self.sender.close()
+
+if __name__ == '__main__':
+    unittest.main()

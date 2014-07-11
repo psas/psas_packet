@@ -67,7 +67,7 @@ def decode(buff):
         raise(BlockSize)
         return
     info = HEADER.decode(buff[:HEADER.size])
-    fourcc, timestamp, length = map(info.get, 'fourcc', 'timestamp', 'length')
+    fourcc, timestamp, length = map(info.get, ['fourcc', 'timestamp', 'length'])
 
     # DATA:
     # figure out what type it is based on FOURCC, and get that message class

@@ -3,37 +3,29 @@
 from __future__ import print_function
 import argparse
 import sys
+import itertools
+import codecs
 from psas_packet import io
 from psas_packet import messages
 
-PSAS = {cls.fourcc: cls for cls in messages.PSAS_MESSAGES}
-HEAD = messages.Head()
+PSAS = messages.MESSAGE_DICT
+HEAD = messages.HEADER
 
 def slicelog(begin, end, inlog, outlog):
     with io.BinFile(inlog) as log:
-        seq = 0
+        messages = log.read()
+        if begin is not None:
+            messages = itertools.dropwhile(lambda data: not ('SEQN' in data and data['SEQN']['Sequence'] >= begin))
+        if end is not None:
+            messages = itertools.takewhile(lambda data: not ('SEQN' in data and data['SEQN']['Sequence'] <= end))
+
         for data in log.read():
             for key in data:
-
-                # scan sequnce numbers
-                if key == 'SEQN':
-                    seq = data[key]['Sequence']
-
-                # as long as we're after the begin number
-                if seq > (begin-1):
-                    if seq > end:
-                        break # but not too far!!
-
-                    # copy log
-                    if key in PSAS:
-                        msg = PSAS[key]
-                        outlog.write(HEAD.encode(msg, data[key]['timestamp']))
-                        outlog.write(msg.encode(data[key]))
-
-            # break out of inner loop
-            else:
-                continue
-            break
+                # copy log
+                if key in PSAS:
+                    msg = PSAS[key]
+                    outlog.write(HEAD.encode(msg, data[key]['timestamp']))
+                    outlog.write(msg.encode(data[key]))
         else:
             print("No break")
 
@@ -42,7 +34,7 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(prog='log2csv')
     parser.add_argument('logfile', type=argparse.FileType('rb'), help="Log file to read")
     parser.add_argument('slice', type=str, help="slice")
-    parser.add_argument('output', type=argparse.FileType('wb'), help="Output File")
+    parser.add_argument('-o', '--output', type=argparse.FileType('wb'), default=getattr(sys.stdout, 'buffer', sys.stdout), help="Output File", required=False)
 
     args = vars(parser.parse_args())
 
@@ -50,10 +42,10 @@ if __name__ == '__main__':
     try:
         begin = int(begin)
     except:
-        begin = 0
+        begin = None
     try:
         end = int(end)
     except:
-        end = sys.maxint
+        end = None
 
     slicelog(begin, end, args['logfile'], args['output'])

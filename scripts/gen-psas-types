@@ -25,7 +25,7 @@ output.write("""/**
 
 """)
 
-for message in messages.PSAS_MESSAGES:
+for message in messages.MESSAGE_LIST:
     output.write(message.typedef())
     output.write('\n\n')
 
