@@ -3,9 +3,7 @@
 """
 import socket
 import struct
-
-TELEMETRY_IP = "127.0.0.1"
-TELEMETRY_PORT = 35001
+from psas_packet import messages
 
 
 class SendUDP(object):
@@ -43,7 +41,19 @@ class SendUDP(object):
         """
         self.socket.close()
 
-    def send_message(self, msgtype, data):
+    def send_message(self, msgtype, timestamp, data):
+        """Send message over socket. Does the packing for you.
+
+        :param Message msgtype: Message class to use for packing, see: psas_packet.messages
+        :param dict data: Data to get packed and sent
+
+        """
+        try:
+            self.socket.send(messages.HEADER.encode(msgtype.fourcc, timestamp) + msgtype.encode(data))
+        except:
+            pass
+
+    def send_data(self, msgtype, data):
         """Send message over socket. Does the packing for you.
 
         :param Message msgtype: Message class to use for packing, see: psas_packet.messages
@@ -55,7 +65,7 @@ class SendUDP(object):
         except:
             pass
 
-    def send_seq_message(self, msgtype, seq, data):
+    def send_seq_data(self, msgtype, seq, data):
         """Send message with a sequence number header over a socket. Does the packing for you.
 
         :param Message msgtype: Message class to use for packing, see: psas_packet.messages
@@ -110,7 +120,7 @@ class ListenUDP(object):
         """
         data = None
         try:
-            data, addr = self.socket.recvfrom(1400)
+            data, addr = self.socket.recvfrom(4096)
         except socket.timeout:
             pass
 

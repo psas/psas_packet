@@ -2,9 +2,7 @@
 # -*- coding: utf-8 -*-
 from __future__ import print_function
 from psas_packet import messages
-
-HEADER = messages.Head()
-PSAS = {cls.fourcc: cls for cls in messages.PSAS_MESSAGES}
+import time
 
 
 def _is_string_like(obj):
@@ -18,69 +16,43 @@ def _is_string_like(obj):
     return True
 
 
-class BlockSize(Exception):
+class Network(object):
+    """Read from a network protcol and decode
 
-    def __init__(self):
-        msg = "Block to decode is too small"
-        Exception.__init__(self, msg)
+    :param connection: socket to read from
+    :returns: Network object
 
-
-def decode_block(block):
-    """Decode a single message from a block of bytes.
-
-    :param bytes block: bytes to try and decode
-    :returns: number of bytes read, dictionary with unpacked values
-
-    Raises exeptions if block is not readable
     """
 
-    # HEADER:
-
-    # make sure we have enough bytes to deocde a header, then do it
-    if len(block) < HEADER.size:
-        raise(BlockSize)
-        return
-    info = HEADER.decode(block[:HEADER.size])
-
-    # DATA:
-
-    # figure out what type it is based on FOURCC, and get that message class
-    message_cls = PSAS.get(info['fourcc'], None)
-
-    if message_cls is None:
-        print("Unknown header!", info['fourcc'])
-        return HEADER.size + info['length'], {'fourcc': info['fourcc']}
-        
-    # Yay! We know about this type, lets unpack it
-    if len(block) < HEADER.size+message_cls.size:
-        raise(BlockSize)
-        return
-    unpacked = message_cls.decode(block[HEADER.size:HEADER.size+message_cls.size])
-    return HEADER.size+message_cls.size, {info['fourcc']: dict({'timestamp': info['timestamp']}, **unpacked)}
-
-
-class Network(object):
-
-    def __init__(self, listener):
-        self.listener = listener
+    def __init__(self, connection):
+        self.conn = connection
 
     def listen(self):
-        with self.listener(35001) as listen:
-            buff = listen.listen()
-            if buff is not None:
-                seq = 0
-                for i, b in enumerate(buff[:4]):
-                    seq = seq + (ord(b) << (3-i))
-                yield seq
-                buff = buff[4:]
-                entries = []
-                while buff != '':
-                    try:
-                        bytes_read, data = decode_block(buff)
-                        buff = buff[bytes_read:]
-                        yield data
-                    except:
-                        pass
+        """Read from socket, and decode the messages inside.
+        """
+
+        # grab bits off the wire
+        buff = self.conn.listen()
+        timestamp = time.time()
+
+        if buff is not None:
+
+            seqn = messages.SequenceNo.decode(buff, timestamp)
+            if seqn is None:
+                return
+            yield seqn
+            buff = buff[messages.SequenceNo.size:]
+
+            # decode until we run out of bytes
+            while buff != '':
+                try:
+                    bytes_read, data = messages.decode(buff)
+                    buff = buff[bytes_read:]
+                    yield data
+                except:
+                    print("Reader Broke!")
+                    return
+
 
 class BinFile(object):
     """Read from a binary log file
@@ -114,14 +86,10 @@ class BinFile(object):
         # As long as we have something to look at
         while buff != b'':
             try:
-                bytes_read, data = decode_block(buff)
+                bytes_read, data = messages.decode(buff)
                 buff = buff[bytes_read:]
-                # Our buffer got too small, read some more from the file
-                # All messages start with a fourcc, so if there isn't at leas 4 bytes we've lost.
-                if len(buff) < 4:
-                    buff += self.fh.read(1 << 20)  # 1 MB
                 yield data
-            except (BlockSize):
+            except (messages.BlockSize):
                 b = self.fh.read(1 << 20)  # 1 MB
                 # Check that we didn't actually hit the end of the file
                 if b == b'':

@@ -12,6 +12,7 @@ import unittest
 from math import fabs
 from psas_packet import messages
 
+
 class TestMessages(unittest.TestCase):
 
     def setUp(self):
@@ -98,7 +99,7 @@ class TestMessages(unittest.TestCase):
         decode = messages.ADIS.decode(encode)
 
         for item, value in decode.items():
-            sigfig = fabs(data[item]) / 100.0 # 1%
+            sigfig = fabs(data[item]) / 100.0 # within 1%
             self.assertAlmostEqual(data[item], value, delta=sigfig)
 
     def test_typedef(self):
@@ -155,32 +156,32 @@ typedef struct {
 
     def test_build_typedef(self):
 
-        for message in messages.PSAS_MESSAGES:
+        for message in messages.MESSAGE_LIST:
             self.assertEqual(type(message.typedef()), str)
 
     def test_fourcc_unique(self):
-        fourcc = [msg.fourcc for msg in messages.PSAS_MESSAGES]
+        fourcc = [msg.fourcc for msg in messages.MESSAGE_LIST]
         dupes = set([x for x in fourcc if fourcc.count(x) > 1])
         self.assertEqual(len(dupes), 0)
 
     def test_header_encode(self):
-        raw = messages.Head.encode(messages.ADIS, 0)
+        raw = messages.HEADER.encode(messages.ADIS, 0)
         self.assertEqual(raw, b'ADIS\x00\x00\x00\x00\x00\x00\x00\x18')
 
-        raw = messages.Head.encode(messages.ADIS, 1)
+        raw = messages.HEADER.encode(messages.ADIS, 1)
         self.assertEqual(raw, b'ADIS\x00\x00\x00\x00\x00\x01\x00\x18')
 
-        raw = messages.Head.encode(messages.ADIS, 226345)
+        raw = messages.HEADER.encode(messages.ADIS, 226345)
         self.assertEqual(raw, b'ADIS\x00\x00\x00\x03t)\x00\x18')
 
     def test_header_decode(self):
-        info = messages.Head.decode(b'ADIS\x00\x00\x00\x00\x00\x00\x00\x18')
+        info = messages.HEADER.decode(b'ADIS\x00\x00\x00\x00\x00\x00\x00\x18')
         self.assertEqual(info, {'fourcc': b'ADIS', 'timestamp': 0, 'length': 24})
 
-        info = messages.Head.decode(b'ADIS\x00\x00\x00\x00\x00\x01\x00\x18')
+        info = messages.HEADER.decode(b'ADIS\x00\x00\x00\x00\x00\x01\x00\x18')
         self.assertEqual(info, {'fourcc': b'ADIS', 'timestamp': 1, 'length': 24})
 
-        info = messages.Head.decode(b'ADIS\x00\x00\x00\x0b\x7fn\x00\x18')
+        info = messages.HEADER.decode(b'ADIS\x00\x00\x00\x0b\x7fn\x00\x18')
         self.assertEqual(info, {'fourcc': b'ADIS', 'timestamp': 753518, 'length': 24})
 
     def tearDown(self):

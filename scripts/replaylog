@@ -45,7 +45,7 @@ def replay(log):
                                 sys.stdout.flush()
                                 #print(cur_seq, len(buff), packet_delay, real_delay, wait_time)
                                 last_pack_sent = time.time()
-                            
+
                             # reset
                             last_seq_time = file_time
                             buff = b''

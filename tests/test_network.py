@@ -10,7 +10,8 @@ Tests for `network` module.
 
 import unittest
 import socket
-from psas_packet import network, messages
+from psas_packet import network
+from psas_packet import messages
 
 class TestNetworkSend(unittest.TestCase):
 
@@ -24,10 +25,20 @@ class TestNetworkSend(unittest.TestCase):
         with network.SendUDP('127.0.0.1', self.receiver_port) as udp:
             data = {'PWM': 1.135e-3, 'Disable': 1}
             expect = messages.ROLL.encode(data)
-            udp.send_message(messages.ROLL, data)
+            udp.send_data(messages.ROLL, data)
 
         recv_data = self.reciever.recv(1024)
         self.assertEqual(expect, recv_data)
+
+    def send_seq_message(self):
+        with network.SendUDP('127.0.0.1', self.receiver_port) as udp:
+            data = {'PWM': 1.135e-3, 'Disable': 1}
+            expect = messages.ROLL.encode(data)
+            udp.send_data(messages.ROLL, data)
+
+        recv_data = self.reciever.recv(1024)
+        self.assertEqual(expect, recv_data)
+
 
     def tearDown(self):
         self.reciever.close()
@@ -41,7 +52,7 @@ class TestNetworkRecieve(unittest.TestCase):
         data = {'PWM': 1.135e-3, 'Disable': 1}
 
         with network.ListenUDP(1934) as listen:
-            self.sender.send_message(messages.ROLL, data)
+            self.sender.send_data(messages.ROLL, data)
             recv_data = listen.listen()
             self.assertEqual(messages.ROLL.encode(data), recv_data)
 

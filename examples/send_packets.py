@@ -6,6 +6,7 @@ Open a UDP socket, and send a message of type "ADIS" to port 25000 on localhost
 """
 
 from psas_packet import network, messages
+import time
 
 # set up a UDP packet sender
 with network.SendUDP('127.0.0.1', 25000) as udp:
@@ -24,10 +25,13 @@ with network.SendUDP('127.0.0.1', 25000) as udp:
         'Magn_Z': 0,
         'Temp': 20,
         'Aux_ADC': 0,
-    })
+    }
 
     # send a whole message (with header)
-    udp.send_message(messages.ADIS, data)
+    udp.send_message(messages.ADIS, time.time(), data)
 
     # send just data (no header)
     udp.send_data(messages.ADIS, data)
+
+    # send data preceded with a sequence number (0, in this case)
+    udp.send_seq_data(messages.ADIS, 0, data)

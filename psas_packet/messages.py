@@ -1,4 +1,4 @@
-""" PSAS Message definitions.
+""" PSAS Message definitions, encoding and decoding functions.
 """
 import struct
 
@@ -20,31 +20,18 @@ CTYPES = {
 }
 
 
-def printable(s):
-    """Takes fourcc code and makes a printable string
+################################################################################
+# Exceptions:
+class BlockSize(Exception):
+    """There is less room in a buffer than the size we need to unpack.
 
-    :param bytes s: Four character code
+    :returns: BlockSize exception
 
-    GPS fourccs have the last character as a raw byte. When we print them the
-    byte should be converted to a string number. For example 'GPS\\x5e' should
-    print as GPS94, not GPS^.
     """
 
-    if b'GPS' in s:
-        char = s[-1]
-        if type(char) is int:
-            s = 'GPS' + str(char)
-        else:
-            s = 'GPS' + str(ord(char))
-        return s
-
-    return s.decode('utf-8')
-
-
-# for some reason floats in python 3 wont cast to int
-class Packable(float):
-    def __index__(self):
-        return int(self)
+    def __init__(self):
+        msg = "Block to decode is too small"
+        Exception.__init__(self, msg)
 
 
 class MessageSizeError(Exception):
@@ -63,6 +50,58 @@ class MessageSizeError(Exception):
         Exception.__init__(self, msg)
 
 
+################################################################################
+# Decoders:
+def decode(buff):
+    """Decode a single message from a block of bytes.
+
+    :param bytes buff: bytes to try and decode
+    :returns: Tuple of number of bytes read, and a dictionary with unpacked values
+
+    Raises exeptions if block is not readable
+    """
+
+    # HEADER:
+    # make sure we have enough bytes to deocde a header, then do it
+    if len(buff) < HEADER.size:
+        raise(BlockSize)
+        return
+    info = HEADER.decode(buff[:HEADER.size])
+    fourcc, timestamp, length = map(info.get, 'fourcc', 'timestamp', 'length')
+
+    # DATA:
+    # figure out what type it is based on FOURCC, and get that message class
+    message_cls = MESSAGE_DICT.get(fourcc, None)
+
+    # Don't recognize it. Skip it but make a record that we tried to unpack
+    if message_cls is None:
+        # Debug
+        #print("Skipped unknown header!", fourcc)
+        return HEADER.size + length, {fourcc: {'timestamp': timestamp}}
+
+    # Yay! We know about this type, lets unpack it
+    unpacked = message_cls.decode(buff[HEADER.size:HEADER.size+message_cls.size])
+    return HEADER.size + length, {fourcc: dict({'timestamp': timestamp}, **unpacked)}
+
+
+class SequenceNo(object):
+    """Unpacking a sequence number, avoiding the struct module here because
+    it's slow and the sequence number defined as just a single 4 byte unsigned
+    integer.
+
+    """
+
+    size = 4
+
+    @classmethod
+    def decode(cls, raw, ts):
+        seqn = 0
+        for i, byte in enumerate(raw[:cls.size]):
+            seqn = seqn + (ord(byte) << (cls.size-i-1))
+
+        return {'SEQN': {'timestamp': ts, 'Sequence': seqn}}
+
+
 class Head(object):
     """Methods to encode and decodes message headers
     """
@@ -72,12 +111,7 @@ class Head(object):
     def __init__(self):
         self.size = self.struct.size
 
-    @classmethod
-    def size(cls):
-        return cls.struct.size
-
-    @classmethod
-    def encode(cls, message_class, time):
+    def encode(self, message_class, time):
         fourcc = message_class.fourcc
         length = message_class.struct.size
 
@@ -86,17 +120,16 @@ class Head(object):
         timestamp_lo = time & 0xffffffff
 
         # encode
-        raw = cls.struct.pack(fourcc, timestamp_hi, timestamp_lo, length)
+        raw = self.struct.pack(fourcc, timestamp_hi, timestamp_lo, length)
         return raw
 
-    @classmethod
-    def decode(cls, raw):
+    def decode(self, raw):
 
-        if len(raw) != cls.struct.size:
-            raise(MessageSizeError(cls.struct.size, len(raw)))
+        if len(raw) != self.struct.size:
+            raise(MessageSizeError(self.struct.size, len(raw)))
             return
 
-        fourcc, timestamp_hi, timestamp_lo, message_length = cls.struct.unpack(raw)
+        fourcc, timestamp_hi, timestamp_lo, message_length = self.struct.unpack(raw)
         timestamp = timestamp_hi << 32 | timestamp_lo
 
         return {'fourcc': fourcc, 'timestamp': timestamp, 'length': message_length}
@@ -225,6 +258,36 @@ class Message(object):
         return typestruct
 
 
+
+################################################################################
+# Util:
+def printable(s):
+    """Takes fourcc code and makes a printable string
+
+    :param bytes s: Four character code
+
+    GPS fourccs have the last character as a raw byte. When we print them the
+    byte should be converted to a string number. For example 'GPS\\x5e' should
+    print as GPS94, not GPS^.
+    """
+
+    if b'GPS' in s:
+        char = s[-1]
+        if type(char) is int:
+            s = 'GPS' + str(char)
+        else:
+            s = 'GPS' + str(ord(char))
+        return s
+
+    return s.decode('utf-8')
+
+
+# for some reason floats in python 3 wont cast to int automatically
+class Packable(float):
+    def __index__(self):
+        return int(self)
+
+################################################################################
 # Here we define known PSAS message types:
 SEQN = Message({
     'name': "SequenceNo",
@@ -808,7 +871,7 @@ GPS99 = Message({
 
 
 # A list of all message types we know about
-PSAS_MESSAGES = [
+MESSAGE_LIST = [
     SEQN,
     ADIS,
     ROLL,
@@ -825,3 +888,5 @@ PSAS_MESSAGES = [
     GPS98,
     GPS99,
 ]
+MESSAGE_DICT = { cls.fourcc: cls for cls in MESSAGE_LIST }
+HEADER = Head()
