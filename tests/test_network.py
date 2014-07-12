@@ -43,21 +43,6 @@ class TestNetworkSend(unittest.TestCase):
     def tearDown(self):
         self.reciever.close()
 
-class TestNetworkRecieve(unittest.TestCase):
-
-    def setUp(self):
-        self.sender = network.SendUDP('127.0.0.1', 1934)
-
-    def test_recv_message(self):
-        data = {'PWM': 1.135e-3, 'Disable': 1}
-
-        with network.ListenUDP(1934) as listen:
-            self.sender.send_data(messages.ROLL, data)
-            recv_data = listen.listen()
-            self.assertEqual(messages.ROLL.encode(data), recv_data)
-
-    def tearDown(self):
-        self.sender.close()
 
 if __name__ == '__main__':
     unittest.main()
