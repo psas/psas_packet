@@ -90,38 +90,3 @@ class SendUDP(object):
             self.socket.send(raw)
         except:
             pass
-
-
-class ListenUDP(object):
-    """UDP socket listener context
-    """
-
-    def __init__(self, listen_port, bind=''):
-        self.bind_addr = bind
-        self.listen_port = listen_port
-
-        self.socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-        self.socket.bind((self.bind_addr, self.listen_port))
-        self.socket.settimeout(1)
-
-    def __enter__(self):
-        return self
-
-    def __exit__(self, type, value, tb):
-        self.close()
-
-    def close(self):
-        """Release the socket
-        """
-        self.socket.close()
-
-    def listen(self):
-        """Listen for messages on the socket
-        """
-        data = None
-        try:
-            data, addr = self.socket.recvfrom(4096)
-        except socket.timeout:
-            pass
-
-        return data

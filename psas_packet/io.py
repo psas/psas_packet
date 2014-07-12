@@ -32,11 +32,10 @@ class Network(object):
         """
 
         # grab bits off the wire
-        buff = self.conn.listen()
+        buff, addr = self.conn.recvfrom(2048)
         timestamp = time.time()
 
         if buff is not None:
-
             seqn = messages.SequenceNo.decode(buff, timestamp)
             if seqn is None:
                 return
@@ -47,6 +46,8 @@ class Network(object):
             while buff != '':
                 try:
                     bytes_read, data = messages.decode(buff)
+                    for d in data:
+                        data[d]['recv'] = timestamp
                     buff = buff[bytes_read:]
                     yield data
                 except:

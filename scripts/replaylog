@@ -10,12 +10,12 @@ from psas_packet import io
 from psas_packet import messages
 from psas_packet import network
 
-PSAS = {cls.fourcc: cls for cls in messages.PSAS_MESSAGES}
-HEAD = messages.Head()
+PSAS = messages.MESSAGE_DICT
+HEAD = messages.HEADER
 
 def replay(log):
 
-    with network.SendUDP(network.TELEMETRY_IP, network.TELEMETRY_PORT) as udp:
+    with network.SendUDP('127.0.0.1', 35001) as udp:
 
         with io.BinFile(log) as log:
             seq = 0

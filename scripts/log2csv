@@ -5,7 +5,7 @@ import argparse
 from psas_packet import io
 from psas_packet import messages
 
-PSAS = {cls.fourcc: cls for cls in messages.PSAS_MESSAGES}
+PSAS = messages.MESSAGE_DICT
 
 def log2csv(f_in):
     files = {}
