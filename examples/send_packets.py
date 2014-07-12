@@ -28,10 +28,10 @@ with network.SendUDP('127.0.0.1', 25000) as udp:
     }
 
     # send a whole message (with header)
-    udp.send_message(messages.ADIS, time.time(), data)
+    #udp.send_message(messages.ADIS, time.time(), data)
 
     # send just data (no header)
-    udp.send_data(messages.ADIS, data)
+    #udp.send_data(messages.ADIS, data)
 
     # send data preceded with a sequence number (0, in this case)
     udp.send_seq_data(messages.ADIS, 0, data)

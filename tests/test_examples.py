@@ -14,10 +14,11 @@ import unittest
 class TestExamples(unittest.TestCase):
 
     def test_send_packets(self):
+ 
         try:
             with open('./examples/send_packets.py', 'r') as ex:
                 exec(ex.read())
-        except ExceptionType:
+        except:
             self.fail("examples/send_packets.py raised ExceptionType unexpectedly!")
 
 

@@ -37,12 +37,12 @@ class TestMessages(unittest.TestCase):
         self.assertEqual(messages.ADIS.encode(data), expect)
 
     def test_roll_message(self):
-        data = {'PWM': -1.35e-3, 'Disable': 1}
+        data = {'Angle': 1.3, 'Disable': 1}
 
         encode = messages.ROLL.encode(data)
         decode = messages.ROLL.decode(encode)
 
-        self.assertAlmostEqual(decode['PWM'], data['PWM'], delta=0.1e-3)
+        self.assertAlmostEqual(decode['Angle'], data['Angle'], delta=0.1e-1)
         self.assertEqual(decode['Disable'], data['Disable'])
 
 

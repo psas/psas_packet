@@ -60,10 +60,7 @@ class SendUDP(object):
         :param dict data: Data to get packed and sent
 
         """
-        try:
-            self.socket.send(msgtype.encode(data))
-        except:
-            pass
+        self.socket.send(msgtype.encode(data))
 
     def send_seq_data(self, msgtype, seq, data):
         """Send message with a sequence number header over a socket. Does the packing for you.
@@ -73,12 +70,9 @@ class SendUDP(object):
         :param dict data: Data to get packed and sent
 
         """
-        try:
-            packed = msgtype.encode(data)
-            s = struct.pack('!L', seq)
-            self.socket.send(s + packed)
-        except:
-            pass
+        packed = msgtype.encode(data)
+        s = struct.pack('!L', seq)
+        self.socket.send(s + packed)
 
     def send_raw(self, raw):
         """Send raw bytes using this connection
@@ -86,7 +80,5 @@ class SendUDP(object):
         :param raw bytes: bytes to send
 
         """
-        try:
-            self.socket.send(raw)
-        except:
-            pass
+        self.socket.send(raw)
+
