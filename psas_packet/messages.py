@@ -80,7 +80,7 @@ def decode(buff):
         return HEADER.size + length, {fourcc: {'timestamp': timestamp}}
 
     # Yay! We know about this type, lets unpack it
-    unpacked = message_cls.decode(buff[HEADER.size:HEADER.size+message_cls.size])
+    unpacked = message_cls.decode(buff[HEADER.size:HEADER.size+length])
     return HEADER.size + length, {fourcc: dict({'timestamp': timestamp}, **unpacked)}
 
 
@@ -326,7 +326,7 @@ ROLL = Message({
     'size': "Fixed",
     'endianness': '!',
     'members': [
-        {'key': "PWM",                  'stype': "H", 'units': {'mks': "second", 'scaleby': 1e-6, 'bias': -1.5e-3}},
+        {'key': "Angle",                'stype': "d"},
         {'key': "Disable",              'stype': "B"},
     ]
 })
