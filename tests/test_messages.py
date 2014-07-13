@@ -15,7 +15,43 @@ from psas_packet import messages
 ADIS = messages.MESSAGES['ADIS']
 ROLL = messages.MESSAGES['ROLL']
 
+class TestDecode(unittest.TestCase):
+
+    def test_decode(self):
+        expect = {
+            'timestamp': 1,
+            'VCC': 5.0,
+            'Gyro_X': 1.0,
+            'Gyro_Y': 0,
+            'Gyro_Z': 0,
+            'Acc_X': 98.0,
+            'Acc_Y': 0,
+            'Acc_Z': 0,
+            'Magn_X': 0,
+            'Magn_Y': 0,
+            'Magn_Z': 0,
+            'Temp': 25,
+            'Aux_ADC': 0,
+        }
+
+        raw = b'ADIS\x00\x00\x00\x00\x00\x01\x00\x18\x08\x13\x00\x14\x00\x00\x00\x00\x0b\xbb\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00'
+
+        bytes_read, output = messages.decode(raw)
+        fourcc, data = output
+
+        self.assertEqual(bytes_read, messages.HEADER.size+ADIS.size)
+        self.assertEqual(fourcc, b'ADIS')
+        self.assertEqual(len(expect), len(data))
+
+        for item, value in data.items():
+            sigfig = expect[item] / 100.0 # 1%
+            self.assertAlmostEqual(expect[item], value, delta=sigfig)
+
+
 class TestMessages(unittest.TestCase):
+
+    def test_printable(self):
+        self.assertEqual(messages.printable(b'GPS^'), "GPS94")
 
     def test_message_encode(self):
         # data with missing entires

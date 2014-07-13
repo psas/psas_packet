@@ -65,7 +65,7 @@ class Network(object):
 
         """
         packed = msgtype.encode(data)
-        s = messages.SequenceNo.encode(seqn)
+        s = messages.MESSAGES['SEQN'].encode({'Sequence': seqn})
 
         try:
             self.conn.send(s + packed)

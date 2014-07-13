@@ -34,12 +34,11 @@ def decode(buff):
     """
 
     # Header:
-    info = HEADER.decode(buff[:HEADER.size])
-    fourcc, timestamp, length = map(info.get, ['fourcc', 'timestamp', 'length'])
+    fourcc, timestamp, length = HEADER.decode(buff[:HEADER.size])
 
     # Data:
     # figure out what type it is based on FOURCC, and get that message class
-    message_cls = MESSAGES.get(fourcc, None)
+    message_cls = MESSAGES.get(printable(fourcc), None)
 
     # Don't recognize it. Skip it but make a record that we tried to unpack
     if message_cls is None:
@@ -50,30 +49,6 @@ def decode(buff):
     # Yay! We know about this type, lets unpack it
     unpacked = message_cls.decode(buff[HEADER.size:HEADER.size+length])
     return HEADER.size + length, (fourcc, dict({'timestamp': timestamp}, **unpacked))
-
-
-class SequenceNo(object):
-    """Unpacking a sequence number found at the beginning of packet
-    communication.
-    """
-
-    struct = struct.Struct('!L')
-
-    @classmethod
-    def decode(cls, raw, ts):
-        seqn = 0
-
-        # Avoiding struct module because of speed
-        for i, byte in enumerate(raw[:cls.size]):
-            print(ord(byte))
-            seqn = seqn + (ord(byte) << (cls.size-i-1))
-
-        return ('SEQN', {'timestamp': ts, 'Sequence': seqn})
-
-    @classmethod
-    def encode(cls, seqn):
-        return MESSAGES['SEQN'].encode({'Sequence': seqn})
-
 
 class Head(object):
     """Encode and decodes message headers
