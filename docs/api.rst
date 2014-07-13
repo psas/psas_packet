@@ -13,6 +13,15 @@ available for packing and unpacking.
    :members: encode, decode, typedef
 
 
+Header
+======
+
+Encodes and decodes message headers
+
+.. autoclass:: psas_packet.messages.Head
+   :members: encode, decode
+
+
 --------------------------------------------------------------------------------
 
 Exceptions

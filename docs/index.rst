@@ -8,7 +8,6 @@ PSAS Packet Serializer
 
        packet
        api
-       network
        examples
 
 `Portland State Aerospace Society <http://psas.pdx.edu/>`_  (PSAS) is a student
