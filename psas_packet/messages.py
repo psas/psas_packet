@@ -50,6 +50,7 @@ def decode(buff):
     unpacked = message_cls.decode(buff[HEADER.size:HEADER.size+length])
     return HEADER.size + length, (fourcc, dict({'timestamp': timestamp}, **unpacked))
 
+
 class Head(object):
     """Encode and decodes message headers
     """

@@ -64,6 +64,7 @@ class Network(object):
         :param dict data: Data to get packed and sent
 
         """
+
         packed = msgtype.encode(data)
         s = messages.MESSAGES['SEQN'].encode({'Sequence': seqn})
 
@@ -111,12 +112,9 @@ class BinFile(object):
                 bytes_read, data = messages.decode(buff)
                 buff = buff[bytes_read:]
                 yield data
-            except (messages.BlockSize):
+            except (messages.MessageSizeError):
                 b = self.fh.read(1 << 20)  # 1 MB
                 # Check that we didn't actually hit the end of the file
                 if b == b'':
                     break
                 buff += b
-            except:
-                #print(buff[:100])
-                pass

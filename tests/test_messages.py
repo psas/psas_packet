@@ -188,7 +188,7 @@ typedef struct {
         self.assertEqual(messages.MESSAGES['GPS80'].typedef(), code)
 
     def test_build_typedef(self):
-
+        # smoke test
         for fourcc, message in messages.MESSAGES.items():
             self.assertEqual(type(message.typedef()), str)
 
