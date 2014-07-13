@@ -5,33 +5,39 @@ Send A Telemetry Packet
 Open a UDP socket, and send a message of type "ADIS" to port 25000 on localhost
 """
 
-from psas_packet import network, messages
+from psas_packet import io, messages
+from contextlib import closing
+import socket
 import time
 
-# set up a UDP packet sender
-with network.SendUDP('127.0.0.1', 25000) as udp:
+# Data type we're going to use
+ADIS = messages.MESSAGES['ADIS']
 
-    # data that will go in our message
-    data = {
-        'VCC': 5.0,
-        'Gyro_X': 0.0,
-        'Gyro_Y': 0,
-        'Gyro_Z': 1,
-        'Acc_X': -9.8,
-        'Acc_Y': 0,
-        'Acc_Z': 0,
-        'Magn_X': 53e-6,
-        'Magn_Y': 0,
-        'Magn_Z': 0,
-        'Temp': 20,
-        'Aux_ADC': 0,
-    }
+# Data to pack
+data = {
+    'VCC': 5.0,
+    'Gyro_X': 0.0,
+    'Gyro_Y': 0,
+    'Gyro_Z': 1,
+    'Acc_X': -9.8,
+    'Acc_Y': 0,
+    'Acc_Z': 0,
+    'Magn_X': 53e-6,
+    'Magn_Y': 0,
+    'Magn_Z': 0,
+    'Temp': 20,
+    'Aux_ADC': 0,
+}
 
-    # send a whole message (with header)
-    #udp.send_message(messages.ADIS, time.time(), data)
+# Open a UDP socket
+with closing(socket.socket(socket.AF_INET, socket.SOCK_DGRAM)) as sock:
+    sock.bind(('', 0))
+    sock.connect(('127.0.0.1', 25000))
+
+    # Network IO class, with our socket as connection
+    net = io.Network(sock)
 
     # send just data (no header)
-    #udp.send_data(messages.ADIS, data)
+    #             type, sequence no, data
+    net.send_data(ADIS,           0, data)
 
-    # send data preceded with a sequence number (0, in this case)
-    udp.send_seq_data(messages.ADIS, 0, data)

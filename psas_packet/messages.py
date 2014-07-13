@@ -2,42 +2,13 @@
 """
 import struct
 
-# Constant, standard gravity
-g_0 = 9.80665  # m/s/s
-
-# conversion to c types
-CTYPES = {
-    'B': 'uint8_t',
-    'b': 'int8_t',
-    'H': 'uint16_t',
-    'h': 'int16_t',
-    'L': 'uint32_t',
-    'l': 'int32_t',
-    'Q': 'uint64_t',
-    'q': 'int64_t',
-    'f': 'float',
-    'd': 'double',
-}
-
 
 ################################################################################
 # Exceptions:
-class BlockSize(Exception):
-    """There is less room in a buffer than the size we need to unpack.
-
-    :returns: BlockSize exception
-
-    """
-
-    def __init__(self):
-        msg = "Block to decode is too small"
-        Exception.__init__(self, msg)
-
-
+################################################################################
 class MessageSizeError(Exception):
     """Raised when the byte str to be unpacked does not match the expected
-    size for this type. Check your message boundaries, or maybe you've
-    reached EOF?
+    size for this type. Check your message boundaries.
 
     :param int expected: correct size
     :param int got: attempted size
@@ -46,64 +17,66 @@ class MessageSizeError(Exception):
     """
 
     def __init__(self, expected, got):
-        msg = "Wrong data size, expected {0}, got {1}".format(expected, got)
+        msg = "Wrong data size, expected {0} bytes, given {1}".format(expected, got)
         Exception.__init__(self, msg)
 
 
 ################################################################################
 # Decoders:
+################################################################################
 def decode(buff):
-    """Decode a single message from a block of bytes.
+    """Decode a single message from a block of bytes. Attempts to read a message
+    in the given byte array.
 
     :param bytes buff: bytes to try and decode
-    :returns: Tuple of number of bytes read, and a dictionary with unpacked values
+    :returns: Tuple: Number of bytes read, and a dictionary with unpacked values
 
-    Raises exeptions if block is not readable
     """
 
-    # HEADER:
-    # make sure we have enough bytes to deocde a header, then do it
-    if len(buff) < HEADER.size:
-        raise(BlockSize)
-        return
+    # Header:
     info = HEADER.decode(buff[:HEADER.size])
     fourcc, timestamp, length = map(info.get, ['fourcc', 'timestamp', 'length'])
 
-    # DATA:
+    # Data:
     # figure out what type it is based on FOURCC, and get that message class
-    message_cls = MESSAGE_DICT.get(fourcc, None)
+    message_cls = MESSAGES.get(fourcc, None)
 
     # Don't recognize it. Skip it but make a record that we tried to unpack
     if message_cls is None:
         # Debug
         #print("Skipped unknown header!", fourcc)
-        return HEADER.size + length, {fourcc: {'timestamp': timestamp}}
+        return HEADER.size + length, (fourcc, {'timestamp': timestamp})
 
     # Yay! We know about this type, lets unpack it
     unpacked = message_cls.decode(buff[HEADER.size:HEADER.size+length])
-    return HEADER.size + length, {fourcc: dict({'timestamp': timestamp}, **unpacked)}
+    return HEADER.size + length, (fourcc, dict({'timestamp': timestamp}, **unpacked))
 
 
 class SequenceNo(object):
-    """Unpacking a sequence number, avoiding the struct module here because
-    it's slow and the sequence number defined as just a single 4 byte unsigned
-    integer.
-
+    """Unpacking a sequence number found at the beginning of packet
+    communication.
     """
 
-    size = 4
+    struct = struct.Struct('!L')
 
     @classmethod
     def decode(cls, raw, ts):
         seqn = 0
+
+        # Avoiding struct module because of speed
         for i, byte in enumerate(raw[:cls.size]):
+            print(ord(byte))
             seqn = seqn + (ord(byte) << (cls.size-i-1))
 
-        return {'SEQN': {'timestamp': ts, 'Sequence': seqn}}
+        return ('SEQN', {'timestamp': ts, 'Sequence': seqn})
+
+    @classmethod
+    def encode(cls, seqn):
+        return MESSAGES['SEQN'].encode({'Sequence': seqn})
 
 
 class Head(object):
-    """Methods to encode and decodes message headers
+    """Encode and decodes message headers
     """
 
     struct = struct.Struct('!4sHLH')
@@ -112,10 +85,18 @@ class Head(object):
         self.size = self.struct.size
 
     def encode(self, message_class, time):
+        """Make a header for a given message class. Headers also contain
+        timestamps of the local time a data was created.
+
+        :param Message message_class: Type message to encode
+        :param int time: Timestamp in nanoseconds
+        :returns: array of raw bytes the size of a Head.struct.size
+
+        """
         fourcc = message_class.fourcc
         length = message_class.struct.size
 
-        # make timestamp
+        # make weird 6 byte timestamp
         timestamp_hi = (time >> 32) & 0xffff
         timestamp_lo = time & 0xffffffff
 
@@ -124,19 +105,26 @@ class Head(object):
         return raw
 
     def decode(self, raw):
+        """Take a buffer of bytes and attempt to decode a header
 
+        :param bytes[] raw: byte array to decode
+        :returns: tuple of the fourcc, timestamp, and lenght
+
+        """
+        # Check that we can safely unpack
         if len(raw) != self.struct.size:
             raise(MessageSizeError(self.struct.size, len(raw)))
-            return
 
-        fourcc, timestamp_hi, timestamp_lo, message_length = self.struct.unpack(raw)
+        fourcc, timestamp_hi, timestamp_lo, length = self.struct.unpack(raw)
+
+        # recreate timestamp from 6 bytes
         timestamp = timestamp_hi << 32 | timestamp_lo
 
-        return {'fourcc': fourcc, 'timestamp': timestamp, 'length': message_length}
+        return fourcc, timestamp, length
 
 
 class Message(object):
-    """Instantiates a message type definition
+    """Definition of a message type
 
     :param dict definition: Dictionary defining data in a message
     :returns: Message instance
@@ -164,7 +152,7 @@ class Message(object):
         self.size = self.struct.size
 
     def __repr__(self):
-        return "{0} message type".format(self.name)
+        return "<{0} message>".format(self.name)
 
     def encode(self, data):
         """Encode a set of data into binary
@@ -258,9 +246,9 @@ class Message(object):
         return typestruct
 
 
-
 ################################################################################
-# Util:
+# Utils
+################################################################################
 def printable(s):
     """Takes fourcc code and makes a printable string
 
@@ -287,9 +275,33 @@ class Packable(float):
     def __index__(self):
         return int(self)
 
+# Constant, standard gravity
+g_0 = 9.80665  # m/s/s
+
+# conversion to c types
+CTYPES = {
+    'B': 'uint8_t',
+    'b': 'int8_t',
+    'H': 'uint16_t',
+    'h': 'int16_t',
+    'L': 'uint32_t',
+    'l': 'int32_t',
+    'Q': 'uint64_t',
+    'q': 'int64_t',
+    'f': 'float',
+    'd': 'double',
+}
+
+# ADC scale for power measuremnets
+_rnhpscale = (3.3/2**12) * (63000.0/69800.0)
+_rnhumbscale = (3.3/2**12)
+
+
 ################################################################################
-# Here we define known PSAS message types:
-SEQN = Message({
+# Types:
+################################################################################
+_list = [
+Message({
     'name': "SequenceNo",
     'fourcc': b'SEQN',
     'size': "Fixed",
@@ -297,9 +309,8 @@ SEQN = Message({
     'members': [
         {'key': "Sequence", 'stype': "L"},
     ]
-})
-
-ADIS = Message({
+}),
+Message({
     'name': "ADIS16405",
     'fourcc': b'ADIS',
     'size': "Fixed",
@@ -318,9 +329,8 @@ ADIS = Message({
         {'key': "Temp",    'stype': "h", 'units': {'mks': "degree c",  'scaleby': 0.14, 'bias': 25}},
         {'key': "Aux_ADC", 'stype': "H", 'units': {'mks': "volt",      'scaleby': 806}},
     ]
-})
-
-ROLL = Message({
+}),
+Message({
     'name': "RollServo",
     'fourcc': b'ROLL',
     'size': "Fixed",
@@ -329,9 +339,8 @@ ROLL = Message({
         {'key': "Angle",                'stype': "d"},
         {'key': "Disable",              'stype': "B"},
     ]
-})
-
-RNHH = Message({
+}),
+Message({
     'name': "RNHHealth",
     'fourcc': b'RNHH',
     'size': "Fixed",
@@ -351,12 +360,8 @@ RNHH = Message({
         {'key': "PackVoltage",          'stype': "H", 'units': {'mks': "volt",      'scaleby': 0.001}},
         {'key': "AverageVoltage",       'stype': "H", 'units': {'mks': "volt",      'scaleby': 0.001}},
     ]
-})
-
-# ADC scale for power measuremnets
-_rnhpscale = (3.3/2**12) * (63000.0/69800.0)
-_rnhumbscale = (3.3/2**12)
-RNHP = Message({
+}),
+Message({
     'name': "RNHPower",
     'fourcc': b'RNHP',
     'size': "Fixed",
@@ -371,10 +376,8 @@ RNHP = Message({
         {'key': "Port7", 'stype': "H", 'units': {'mks': 'amp', 'scaleby': _rnhpscale}},
         {'key': "Port8", 'stype': "H", 'units': {'mks': 'amp', 'scaleby': _rnhpscale}},
     ]
-})
-
-
-FCFH = Message({
+}),
+Message({
     'name': "FCFHealth",
     'fourcc': b'FCFH',
     'size': "Fixed",
@@ -407,10 +410,8 @@ FCFH = Message({
         {'key': "IO_wlan0_Packets_Recv",        'stype': 'L'},
         {'key': "Core_Temp",                    'stype': 'H'},
     ]
-})
-
-
-LTC = Message({
+}),
+Message({
     'name': "LaunchTowerComputer",
     'fourcc': b'LTCH',
     'size': "Fixed",
@@ -430,10 +431,8 @@ LTC = Message({
         {'key': "Wind_Direction",                'stype': "f"},
         {'key': "Barometric_Pressure",           'stype': "f"}
     ]
-})
-
-
-GPS1 = Message({
+}),
+Message({
     'name': "GPSFix",
     'fourcc': b'GPS'+chr(1).encode(),
     'size': "Fixed",
@@ -453,9 +452,8 @@ GPS1 = Message({
         {'key': "Nav_Mode",             'stype': 'H'},
         {'key': "Extended_Age_Of_Diff", 'stype': 'H', 'units': {'mks': "second"}},
     ]
-})
-
-GPS2 = Message({
+}),
+Message({
     'name': "GPSFixQuality",
     'fourcc': b'GPS'+chr(2).encode(),
     'size': "Fixed",
@@ -468,9 +466,8 @@ GPS2 = Message({
         {'key': "VDOP",                 'stype': 'H', 'units': {'scaleby': 10}},
         {'key': "Mask_WAAS_PRN",        'stype': 'H'},
     ]
-})
-
-GPS80 = Message({
+}),
+Message({
     'name': "GPSWAASMessage",
     'fourcc': b'GPS'+chr(80).encode(),
     'size': "Fixed",
@@ -481,9 +478,8 @@ GPS80 = Message({
         {'key': "Msg_Sec_of_Week",      'stype': 'L'},
         {'key': "Waas_Msg",             'stype': '32s'},
     ]
-})
-
-GPS93 = Message({
+}),
+Message({
     'name': "GPSWAASEphemeris",
     'fourcc': b'GPS'+chr(93).encode(),
     'size': "Fixed",
@@ -507,9 +503,8 @@ GPS93 = Message({
         {'key': "Gf_Zero",              'stype': 'H'},
         {'key': "Gf_Zero_Dot",          'stype': 'H'},
     ]
-})
-
-GPS94 = Message({
+}),
+Message({
     'name': "GPSIonosphereUTC",
     'fourcc': b'GPS'+chr(94).encode(),
     'size': "Fixed",
@@ -533,9 +528,8 @@ GPS94 = Message({
         {'key': "dtlsf",                'stype': 'H'},
         {'key': "space",                'stype': 'H'},
     ]
-})
-
-GPS95 = Message({
+}),
+Message({
     'name': "GPSEphemeris",
     'fourcc': b'GPS'+chr(95).encode(),
     'size': "Fixed",
@@ -548,9 +542,8 @@ GPS95 = Message({
         {'key': "SF2_Words",            'stype': '40s'},
         {'key': "SF3_Words",            'stype': '40s'},
     ]
-})
-
-GPS96 = Message({
+}),
+Message({
     'name': "GPSPsudorange",
     'fourcc': b'GPS'+chr(96).encode(),
     'size': "Fixed",
@@ -608,9 +601,8 @@ GPS96 = Message({
         {'key': "Phase_10",             'stype': 'd', 'units': {'mks': "meter"}},
         {'key': "Phase_11",             'stype': 'd', 'units': {'mks': "meter"}},
     ]
-})
-
-GPS98 = Message({
+}),
+Message({
     'name': "GPSAlmanac",
     'fourcc': b'GPS'+chr(98).encode(),
     'size': "Fixed",
@@ -621,9 +613,8 @@ GPS98 = Message({
         {'key': "IonoUTCV_Flag",        'stype': 'B'},
         {'key': "spare",                'stype': 'H'},
     ]
-})
-
-GPS99 = Message({
+}),
+Message({
     'name': "GPSSatellite",
     'fourcc': b'GPS'+chr(99).encode(),
     'size': "Fixed",
@@ -867,26 +858,7 @@ GPS99 = Message({
         {'key': "Clock_Err_L1",         'stype': 'h'},
         {'key': "spare",                'stype': 'H'},
     ]
-})
+})]
 
-
-# A list of all message types we know about
-MESSAGE_LIST = [
-    SEQN,
-    ADIS,
-    ROLL,
-    RNHH,
-    RNHP,
-    FCFH,
-    LTC,
-    GPS1,
-    GPS2,
-    GPS80,
-    GPS93,
-    GPS95,
-    GPS96,
-    GPS98,
-    GPS99,
-]
-MESSAGE_DICT = { cls.fourcc: cls for cls in MESSAGE_LIST }
+MESSAGES = {printable(cls.fourcc): cls for cls in _list}
 HEADER = Head()

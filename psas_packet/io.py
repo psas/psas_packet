@@ -1,8 +1,10 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 from __future__ import print_function
-from psas_packet import messages
+import socket
+import errno
 import time
+from psas_packet import messages
 
 
 def _is_string_like(obj):
@@ -53,6 +55,25 @@ class Network(object):
                 except:
                     print("Reader Broke!")
                     return
+
+    def send_data(self, msgtype, seqn, data):
+        """Send message with a sequence number header over a socket. Does the packing for you.
+
+        :param Message msgtype: Message class to use for packing, see: psas_packet.messages
+        :param int seqn: Sequence number
+        :param dict data: Data to get packed and sent
+
+        """
+        packed = msgtype.encode(data)
+        s = messages.SequenceNo.encode(seqn)
+
+        try:
+            self.conn.send(s + packed)
+        except socket.error as e:
+            if e.errno == errno.ECONNREFUSED:
+                print('connection refused, continuing')
+            else:
+                raise
 
 
 class BinFile(object):

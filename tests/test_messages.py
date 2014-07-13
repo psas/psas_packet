@@ -12,47 +12,44 @@ import unittest
 from math import fabs
 from psas_packet import messages
 
+ADIS = messages.MESSAGES['ADIS']
+ROLL = messages.MESSAGES['ROLL']
 
 class TestMessages(unittest.TestCase):
 
-    def setUp(self):
-        pass
-
-    def test_encode(self):
+    def test_message_encode(self):
+        # data with missing entires
         data = {
             'VCC': 5.0,
             'Gyro_X': 0.0,
-            'Gyro_Y': 0,
             'Gyro_Z': 1,
             'Acc_X': -9.8,
             'Acc_Y': 0,
             'Acc_Z': 0,
             'Magn_X': 53e-6,
-            'Magn_Y': 0,
             'Magn_Z': 0,
             'Temp': 20,
             'Aux_ADC': 0,
         }
         expect = b'\x08\x13\x00\x00\x00\x00\x00\x14\xfe\xd4\x00\x00\x00\x00\x04$\x00\x00\x00\x00\xff\xdd\x00\x00'
-        self.assertEqual(messages.ADIS.encode(data), expect)
+        self.assertEqual(ADIS.encode(data), expect)
 
     def test_roll_message(self):
         data = {'Angle': 1.3, 'Disable': 1}
 
-        encode = messages.ROLL.encode(data)
-        decode = messages.ROLL.decode(encode)
+        encode = ROLL.encode(data)
+        decode = ROLL.decode(encode)
 
         self.assertAlmostEqual(decode['Angle'], data['Angle'], delta=0.1e-1)
         self.assertEqual(decode['Disable'], data['Disable'])
 
-
     def test_decode_too_short(self):
         raw = b'\x08\x13\x00\x00\x00\x00\x00\x14\xfe\xda\x00\x00\x00'
-        self.assertRaises(messages.MessageSizeError, messages.ADIS.decode, raw)
+        self.assertRaises(messages.MessageSizeError, ADIS.decode, raw)
 
     def test_decode_too_long(self):
         raw = b'\x08\x13\x00\x00\x00\x00\x00\x14\xfe\xda\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\xff\xdd\x00\x00\x00'
-        self.assertRaises(messages.MessageSizeError, messages.ADIS.decode, raw)
+        self.assertRaises(messages.MessageSizeError, ADIS.decode, raw)
 
     def test_decode(self):
         expect = {
@@ -72,7 +69,7 @@ class TestMessages(unittest.TestCase):
 
         raw = b'\x08\x13\x00\x14\x00\x00\x00\x00\x0b\xbb\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00'
 
-        output = messages.ADIS.decode(raw)
+        output = ADIS.decode(raw)
         self.assertEqual(len(expect), len(output))
 
         for item, value in output.items():
@@ -95,8 +92,8 @@ class TestMessages(unittest.TestCase):
             'Aux_ADC': 0,
         }
 
-        encode = messages.ADIS.encode(data)
-        decode = messages.ADIS.decode(encode)
+        encode = ADIS.encode(data)
+        decode = ADIS.decode(encode)
 
         for item, value in decode.items():
             sigfig = fabs(data[item]) / 100.0 # within 1%
@@ -130,7 +127,7 @@ typedef struct {
 } __attribute__((packed)) ADISMessage;
 """
 
-        self.assertEqual(messages.ADIS.typedef(), code)
+        self.assertEqual(ADIS.typedef(), code)
 
     def test_typedef_corner(self):
 
@@ -152,40 +149,58 @@ typedef struct {
 } __attribute__((packed)) GPS80Message;
 """
 
-        self.assertEqual(messages.GPS80.typedef(), code)
+        self.assertEqual(messages.MESSAGES['GPS80'].typedef(), code)
 
     def test_build_typedef(self):
 
-        for message in messages.MESSAGE_LIST:
+        for fourcc, message in messages.MESSAGES.items():
             self.assertEqual(type(message.typedef()), str)
 
     def test_fourcc_unique(self):
-        fourcc = [msg.fourcc for msg in messages.MESSAGE_LIST]
-        dupes = set([x for x in fourcc if fourcc.count(x) > 1])
-        self.assertEqual(len(dupes), 0)
+        self.assertEqual(len(messages._list), len(messages.MESSAGES))
 
     def test_header_encode(self):
-        raw = messages.HEADER.encode(messages.ADIS, 0)
+        raw = messages.HEADER.encode(ADIS, 0)
         self.assertEqual(raw, b'ADIS\x00\x00\x00\x00\x00\x00\x00\x18')
 
-        raw = messages.HEADER.encode(messages.ADIS, 1)
+        raw = messages.HEADER.encode(ADIS, 1)
         self.assertEqual(raw, b'ADIS\x00\x00\x00\x00\x00\x01\x00\x18')
 
-        raw = messages.HEADER.encode(messages.ADIS, 226345)
+        raw = messages.HEADER.encode(ADIS, 226345)
         self.assertEqual(raw, b'ADIS\x00\x00\x00\x03t)\x00\x18')
 
     def test_header_decode(self):
         info = messages.HEADER.decode(b'ADIS\x00\x00\x00\x00\x00\x00\x00\x18')
-        self.assertEqual(info, {'fourcc': b'ADIS', 'timestamp': 0, 'length': 24})
+        self.assertEqual(info, (b'ADIS', 0, 24))
 
         info = messages.HEADER.decode(b'ADIS\x00\x00\x00\x00\x00\x01\x00\x18')
-        self.assertEqual(info, {'fourcc': b'ADIS', 'timestamp': 1, 'length': 24})
+        self.assertEqual(info, (b'ADIS', 1, 24))
 
         info = messages.HEADER.decode(b'ADIS\x00\x00\x00\x0b\x7fn\x00\x18')
-        self.assertEqual(info, {'fourcc': b'ADIS', 'timestamp': 753518, 'length': 24})
+        self.assertEqual(info, (b'ADIS', 753518, 24))
 
-    def tearDown(self):
-        pass
+    def test_seqn_encode(self):
+        SEQN = messages.MESSAGES['SEQN']
+        s = SEQN.encode({'Sequence': 0})
+        self.assertEqual(s, b'\x00\x00\x00\x00')
+
+        s = SEQN.encode({'Sequence': 1})
+        self.assertEqual(s, b'\x00\x00\x00\x01')
+
+        s = SEQN.encode({'Sequence': 84729300})
+        self.assertEqual(s, b'\x05\x0c\xdd\xd4')
+
+    def test_seqn_decode(self):
+        SEQN = messages.MESSAGES['SEQN']
+        data = SEQN.decode(b'\x00\x00\x00\x00')
+        self.assertEqual(data, {'Sequence': 0})
+
+        data = SEQN.decode(b'\x00\x00\x00\x01')
+        self.assertEqual(data, {'Sequence': 1})
+
+        data = SEQN.decode(b'\x01\xf6\xc4\xb8')
+        self.assertEqual(data, {'Sequence': 32949432})
+
 
 if __name__ == '__main__':
     unittest.main()
