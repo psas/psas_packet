@@ -4,18 +4,21 @@
 from __future__ import print_function
 import argparse
 import struct
+from contextlib import closing
+import socket
 import time
 import sys
 from psas_packet import io
 from psas_packet import messages
-from psas_packet import network
 
-PSAS = messages.MESSAGE_DICT
+PSAS = messages.MESSAGES
 HEAD = messages.HEADER
 
 def replay(log):
 
-    with network.SendUDP('127.0.0.1', 35001) as udp:
+    with closing(socket.socket(socket.AF_INET, socket.SOCK_DGRAM)) as sock:
+        sock.bind(('', 0))
+        sock.connect(('127.0.0.1', 35001))
 
         with io.BinFile(log) as log:
             seq = 0
@@ -25,53 +28,48 @@ def replay(log):
             now = time.time()
             last_pack_sent = 0
             buff = b''
-            for data in log.read():
-                for key in data:
+            for fourcc, data in log.read():
+                # scan sequnce numbers
+                if fourcc == 'SEQN':
+                    seq = data['Sequence']
+                    if seq != cur_seq:
+                        # Wait and send
+                        if len(buff) > 0:
+                            now = time.time()
+                            packet_delay = (file_time - last_seq_time)/1e9
+                            real_delay = now - last_pack_sent
+                            wait_time = packet_delay - real_delay
+                            if wait_time > 0:
+                                time.sleep(wait_time)
+                            sock.send(buff)
+                            sys.stdout.write("  Sequence No.: {0}\r".format(seq))
+                            sys.stdout.flush()
+                            #print(cur_seq, len(buff), packet_delay, real_delay, wait_time)
+                            last_pack_sent = time.time()
 
-                    # scan sequnce numbers
-                    if key == 'SEQN':
-                        seq = data[key]['Sequence']
-                        if seq != cur_seq:
-                            # Wait and send
-                            if len(buff) > 0:
-                                now = time.time()
-                                packet_delay = (file_time - last_seq_time)/1e9
-                                real_delay = now - last_pack_sent
-                                wait_time = packet_delay - real_delay
-                                if wait_time > 0:
-                                    time.sleep(wait_time)
-                                udp.send_raw(buff)
-                                sys.stdout.write("  Sequence No.: {0}\r".format(seq))
-                                sys.stdout.flush()
-                                #print(cur_seq, len(buff), packet_delay, real_delay, wait_time)
-                                last_pack_sent = time.time()
+                        # reset
+                        last_seq_time = file_time
+                        buff = b''
+                        buff += struct.pack('!L', seq)
+                        cur_seq = seq
+                else:
+                    # copy log
+                    msg = messages.MESSAGES.get(messages.printable(fourcc))
+                    if msg is not None:
+                        buff += HEAD.encode(msg, data['timestamp'])
+                        buff += msg.encode(data)
+                        file_time = data['timestamp']
 
-                            # reset
-                            last_seq_time = file_time
-                            buff = b''
-                            buff += struct.pack('!L', seq)
-                            cur_seq = seq
-
-
-                    else:
-                        # copy log
-                        if key in PSAS:
-                            msg = PSAS[key]
-                            dat = data[key]
-                            buff += HEAD.encode(msg, data[key]['timestamp'])
-                            buff += msg.encode(data[key])
-                            file_time = data[key]['timestamp']
-
-        # flush last packet
-        now = time.time()
-        packet_delay = (file_time - last_seq_time)/1e9
-        real_delay = now - last_pack_sent
-        wait_time = packet_delay - real_delay
-        if wait_time > 0:
-            time.sleep(wait_time)
-        udp.send_raw(buff)
-        sys.stdout.write("  Sequence No.: {0}\n".format(seq))
-        #print(cur_seq, len(buff), packet_delay, real_delay, wait_time)
+            # flush last packet
+            now = time.time()
+            packet_delay = (file_time - last_seq_time)/1e9
+            real_delay = now - last_pack_sent
+            wait_time = packet_delay - real_delay
+            if wait_time > 0:
+                time.sleep(wait_time)
+            udp.send_raw(buff)
+            sys.stdout.write("  Sequence No.: {0}\n".format(seq))
+            #print(cur_seq, len(buff), packet_delay, real_delay, wait_time)
 
     print("EOF")
 

@@ -9,7 +9,6 @@ Tests for `io` module.
 """
 
 from __future__ import print_function
-
 import unittest
 import json
 from psas_packet import io
