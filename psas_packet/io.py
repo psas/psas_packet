@@ -118,3 +118,36 @@ class BinFile(object):
                 if b == b'':
                     break
                 buff += b
+
+
+def log2csv(f_in):
+    """Read in a binary logfile and output a set of .csv files with the data
+    """
+
+    files = {}
+    seq = 0
+    with BinFile(f_in) as log:
+
+        # Read file
+        for fourcc, data in log.read():
+            if fourcc in messages.MESSAGES:
+
+                # first time seeing data from this type
+                if fourcc not in files:
+                    files[fourcc] = open(str(messages.printable(fourcc))+'.csv', 'w')
+                    files[fourcc].write("# [0]SEQN, [1]Timestamp")
+                    for i, member in enumerate(messages.MESSAGES[messages.printable(fourcc)].member_list):
+                        files[fourcc].write(", [{0}]{1}".format(i+2, member['key']))
+                    files[fourcc].write('\n')
+
+                if fourcc == b'SEQN':
+                    seq = data['Sequence']
+
+                f_out = files[fourcc]
+                f_out.write(str(seq)+","+str(data['timestamp']))
+                for member in messages.MESSAGES[fourcc].member_list:
+                    f_out.write(","+str(data[member['key']]))
+                f_out.write('\n')
+
+    for f_out in files:
+        f_out.close()

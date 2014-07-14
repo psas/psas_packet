@@ -20,7 +20,14 @@ class TestIO(unittest.TestCase):
     def setUp(self):
         with open("tests/data/simple_log.json") as j:
             self.simple_log_data = json.loads(j.read())
-    
+
+    def test_log2csv(self):
+        # smoke test
+        try:
+            io.log2csv("tests/data/simple_log.json")
+        except:
+            self.fail("log2csv exception")
+
     def test_read_logfile(self):
         with io.BinFile("tests/data/simple_logfile") as log:
             """Uncomment to generate test data from new logfile:

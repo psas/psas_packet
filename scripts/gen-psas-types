@@ -25,7 +25,7 @@ output.write("""/**
 
 """)
 
-for message in messages.MESSAGE_LIST:
+for fourcc, message in messages.MESSAGES.items():
     output.write(message.typedef())
     output.write('\n\n')
 
