@@ -6,6 +6,7 @@ import errno
 import time
 from psas_packet import messages
 
+SEQN = messages.MESSAGES['SEQN']
 
 def _is_string_like(obj):
     """
@@ -38,20 +39,18 @@ class Network(object):
         timestamp = time.time()
 
         if buff is not None:
-            seqn = messages.SequenceNo.decode(buff, timestamp)
+            seqn = SEQN.decode(buff[:SEQN.size])
             if seqn is None:
                 return
-            yield seqn
-            buff = buff[messages.SequenceNo.size:]
+            yield timestamp, ('SEQN', seqn)
+            buff = buff[SEQN.size:]
 
             # decode until we run out of bytes
             while buff != '':
                 try:
                     bytes_read, data = messages.decode(buff)
-                    for d in data:
-                        data[d]['recv'] = timestamp
                     buff = buff[bytes_read:]
-                    yield data
+                    yield timestamp, data
                 except:
                     print("Reader Broke!")
                     return
