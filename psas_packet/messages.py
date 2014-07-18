@@ -44,11 +44,11 @@ def decode(buff):
     if message_cls is None:
         # Debug
         #print("Skipped unknown header!", fourcc)
-        return HEADER.size + length, (fourcc, {'timestamp': timestamp})
+        return HEADER.size + length, (printable(fourcc), {'timestamp': timestamp})
 
     # Yay! We know about this type, lets unpack it
     unpacked = message_cls.decode(buff[HEADER.size:HEADER.size+length])
-    return HEADER.size + length, (fourcc, dict({'timestamp': timestamp}, **unpacked))
+    return HEADER.size + length, (printable(fourcc), dict({'timestamp': timestamp}, **unpacked))
 
 
 class Head(object):
@@ -175,9 +175,11 @@ class Message(object):
         values = {}
         for i, v in enumerate(unpack):
             m = self.member_list[i]
-            units = m.get('units', {})
-            v = (v * units.get('scaleby', 1)) + units.get('bias', 0)
-
+            if type(v) is int or type(v) is float:
+                units = m.get('units', {})
+                v = (v * units.get('scaleby', 1)) + units.get('bias', 0)
+            elif type(v) is str:
+                v = ""
             values[m['key']] = v
 
         # Return dictionary instead of list

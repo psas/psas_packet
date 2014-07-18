@@ -40,7 +40,7 @@ class TestDecode(unittest.TestCase):
         fourcc, data = output
 
         self.assertEqual(bytes_read, messages.HEADER.size+ADIS.size)
-        self.assertEqual(fourcc, b'ADIS')
+        self.assertEqual(fourcc, 'ADIS')
         self.assertEqual(len(expect), len(data))
 
         for item, value in data.items():

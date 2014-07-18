@@ -39,7 +39,7 @@ class TestIO(unittest.TestCase):
 
             for i, d in enumerate(log.read()):
                 fourcc, data = d
-                self.assertEqual(self.simple_log_data[i], {fourcc.decode('utf-8'): data})
+                self.assertEqual(self.simple_log_data[i], {fourcc: data})
 
 
 if __name__ == '__main__':

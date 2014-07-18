@@ -51,6 +51,9 @@ class Network(object):
                     bytes_read, data = messages.decode(buff)
                     buff = buff[bytes_read:]
                     yield timestamp, data
+                except messages.MessageSizeError:
+                    print("out of sync")
+                    return
                 except:
                     print("Reader Broke!")
                     return
