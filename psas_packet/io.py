@@ -7,6 +7,7 @@ import time
 from psas_packet import messages
 
 SEQN = messages.MESSAGES['SEQN']
+HEADER = messages.HEADER
 
 def _is_string_like(obj):
     """
@@ -100,6 +101,38 @@ class BinFile(object):
 
     def __exit__(self, type, value, tb):
         self.fh.close()
+
+    def scan(self):
+        """Only unpack sequence numbers and return raw data inbetween
+        """
+
+        # Read a chunk of file
+        buff = self.fh.read(1 << 20)  # 1 MB
+
+        # As long as we have something to look at
+        while buff != b'':
+            try:
+                fourcc, timestamp, length = HEADER.decode(buff[:HEADER.size])
+                bytes_read = HEADER.size + length
+
+                if len(buff) < bytes_read:
+                    b = self.fh.read(1 << 20)  # 1 MB
+                    # Check that we didn't actually hit the end of the file
+                    if b == b'':
+                        break
+                    buff += b
+
+                raw = buff[:bytes_read]
+                yield fourcc, raw
+
+                buff = buff[bytes_read:]
+            except (messages.MessageSizeError):
+                b = self.fh.read(1 << 20)  # 1 MB
+                # Check that we didn't actually hit the end of the file
+                if b == b'':
+                    break
+                buff += b
+
 
     def read(self):
         """Read the file and return data inside it

@@ -6,13 +6,13 @@ import argparse
 import struct
 from contextlib import closing
 import socket
+import errno
 import time
 import sys
 from psas_packet import io
 from psas_packet import messages
 
-PSAS = messages.MESSAGES
-HEAD = messages.HEADER
+SEQN = messages.MESSAGES['SEQN']
 
 def replay(log):
 
@@ -28,10 +28,13 @@ def replay(log):
             now = time.time()
             last_pack_sent = 0
             buff = b''
-            for fourcc, data in log.read():
+            for fourcc, raw in log.scan():
                 # scan sequnce numbers
-                if fourcc == 'SEQN':
+                if fourcc == SEQN.fourcc:
+                    fourcc, timestamp, length = messages.HEADER.decode(raw[:messages.HEADER.size])
+                    data = SEQN.decode(raw[messages.HEADER.size:])
                     seq = data['Sequence']
+                    file_time = timestamp
                     if seq != cur_seq:
                         # Wait and send
                         if len(buff) > 0:
@@ -41,10 +44,16 @@ def replay(log):
                             wait_time = packet_delay - real_delay
                             if wait_time > 0:
                                 time.sleep(wait_time)
-                            sock.send(buff)
+                            try:
+                                sock.send(buff)
+                            except socket.error as e:
+                                if e.errno == errno.ECONNREFUSED:
+                                    pass
+                                else:
+                                    print(e)
+                                    raise
                             sys.stdout.write("  Sequence No.: {0}\r".format(seq))
                             sys.stdout.flush()
-                            #print(cur_seq, len(buff), packet_delay, real_delay, wait_time)
                             last_pack_sent = time.time()
 
                         # reset
@@ -54,11 +63,7 @@ def replay(log):
                         cur_seq = seq
                 else:
                     # copy log
-                    msg = messages.MESSAGES.get(messages.printable(fourcc))
-                    if msg is not None:
-                        buff += HEAD.encode(msg, data['timestamp'])
-                        buff += msg.encode(data)
-                        file_time = data['timestamp']
+                    buff += raw
 
             # flush last packet
             now = time.time()
@@ -67,7 +72,15 @@ def replay(log):
             wait_time = packet_delay - real_delay
             if wait_time > 0:
                 time.sleep(wait_time)
-            udp.send_raw(buff)
+            try:
+                sock.send(buff)
+            except socket.error as e:
+                if e.errno == errno.ECONNREFUSED:
+                    pass
+                else:
+                    print(e)
+                    raise
+
             sys.stdout.write("  Sequence No.: {0}\n".format(seq))
             #print(cur_seq, len(buff), packet_delay, real_delay, wait_time)
 
