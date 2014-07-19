@@ -126,6 +126,13 @@ class BinFile(object):
                 yield fourcc, raw
 
                 buff = buff[bytes_read:]
+                # check boundary
+                if len(buff) < 4:
+                    b = self.fh.read(1 << 20)  # 1 MB
+                    # Check that we didn't actually hit the end of the file
+                    if b == b'':
+                        break
+                    buff += b
             except (messages.MessageSizeError):
                 b = self.fh.read(1 << 20)  # 1 MB
                 # Check that we didn't actually hit the end of the file

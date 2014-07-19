@@ -309,6 +309,26 @@ Message({
     ]
 }),
 Message({
+    'name': "MPL3115A2",
+    'fourcc': b'MPL3',
+    'size': "Fixed",
+    'endianness': '!',
+    'members': [
+        {'key': "Pressure",             'stype': "L", 'units': {'mks': "kPa",      'scaleby': 1.5625e-5 }},
+        {'key': "Temp",                 'stype': "h", 'units': {'mks': "degree c", 'scaleby': 1/256}},
+    ]
+}),
+Message({
+    'name': "MPL3115A2",
+    'fourcc': b'MPL3',
+    'size': "Fixed",
+    'endianness': '!',
+    'members': [
+        {'key': "Pressure",             'stype': "L", 'units': {'mks': "kPa",      'scaleby': 1.5625e-5 }},
+        {'key': "Temp",                 'stype': "h", 'units': {'mks': "degree c", 'scaleby': 1/256}},
+    ]
+}),
+Message({
     'name': "RollServo",
     'fourcc': b'ROLL',
     'size': "Fixed",
