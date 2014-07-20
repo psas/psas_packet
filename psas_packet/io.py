@@ -28,8 +28,17 @@ class Network(object):
 
     """
 
-    def __init__(self, connection):
+    def __init__(self, connection, logfile=None):
         self.conn = connection
+
+        self.fh = None
+        if logfile is not None:
+            # does this look like an object we can write to?
+            # otherwise assume it's the filename to open
+            if hasattr(logfile, 'write'):
+                self.fh = logfile
+            else:
+                self.fh = open(logfile, 'wb')
 
     def listen(self):
         """Read from socket, and decode the messages inside.
@@ -45,6 +54,12 @@ class Network(object):
                 return
             yield timestamp, ('SEQN', seqn)
             buff = buff[SEQN.size:]
+
+            if self.fh is not None:
+                self.fh.write(HEADER.encode(SEQN, int(timestamp)))
+                self.fh.write(SEQN.encode(seqn))
+                self.fh.write(buff)
+                self.fh.flush()
 
             # decode until we run out of bytes
             while buff != '':
