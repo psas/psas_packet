@@ -1,0 +1,59 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+from __future__ import print_function
+from psas_packet import messages
+import struct
+
+print("""===================
+Message Definitions
+===================
+
+These are all the message types pre-defined in psas_packet.messages.MESSAGES
+""")
+for fourcc, message in sorted(messages.MESSAGES.items()):
+    print(fourcc)
+    print('='*len(fourcc)+"\n")
+    print(message.name)
+    print("\n**Format Description:**\n")
+
+    field_size = len("Field")
+    type_size = len("Type")
+    size_size = len("Size [Bytes]")
+    for field in message.member_list:
+        if len(str(field['key'])) > field_size:
+            field_size = len(field['key'])
+
+        stype = field['stype']
+        if 's' in stype:
+            ctype = 'char'
+            size = int(stype.replace('s', ''))
+            ctype = ctype + '[{0}]'.format(size)
+        else:
+            ctype = messages.CTYPES[stype]
+        if len(str(ctype)) > type_size:
+            type_size = len(str(ctype))
+
+        s = struct.Struct(stype)
+        if len(str(s.size)) > size_size:
+            size_size = len(str(s.size))
+
+    fmt = "| %%%ds | %%%ds | %%%ds |" % (field_size, type_size, size_size)
+
+
+    print('+'+'-'*(field_size+2)+'+'+'-'*(type_size+2)+'+'+'-'*(size_size+2)+'+')
+    print(fmt % ("Field", "Type", "Size [Bytes]"))
+    print('+'+'-'*(field_size+2)+'+'+'-'*(type_size+2)+'+'+'-'*(size_size+2)+'+')
+    for field in message.member_list:
+        stype = field['stype']
+        if 's' in stype:
+            ctype = 'char'
+            size = int(stype.replace('s', ''))
+            ctype = ctype + '[{0}]'.format(size)
+        else:
+            ctype = messages.CTYPES[stype]
+        s = struct.Struct(field['stype'])
+        print(fmt % (field['key'], ctype, s.size))
+        print('+'+'-'*(field_size+2)+'+'+'-'*(type_size+2)+'+'+'-'*(size_size+2)+'+')
+    print('\n')
+    print('--------------------------------------------------------------------------------')
+    print('\n')

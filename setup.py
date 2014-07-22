@@ -23,6 +23,7 @@ setup(
         'scripts/log2csv',
         'scripts/slicelog',
         'scripts/replaylog',
+        'scripts/autodoc',
     ],
     license=open('LICENSE').read(),
     zip_safe=False,

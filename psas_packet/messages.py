@@ -185,7 +185,7 @@ class Message(object):
                 units = m.get('units', {})
                 v = (v * units.get('scaleby', 1)) + units.get('bias', 0)
             elif type(v) is str:
-                v = ""
+                v = v
             values[m['key']] = v
 
         # Return dictionary instead of list

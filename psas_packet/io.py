@@ -200,8 +200,8 @@ def log2csv(f_in):
 
                 if fourcc == b'SEQN':
                     seq = data['Sequence']
-                    #sys.stdout.write(" SEQN: %10d \r" % seq)
-                    #sys.stdout.flush()
+                    sys.stdout.write(" SEQN: %10d \r" % seq)
+                    sys.stdout.flush()
 
                 f_out = files[fourcc]
                 f_out.write(str(seq)+","+str(data['timestamp']))

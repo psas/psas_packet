@@ -7,6 +7,7 @@ PSAS Packet Serializer
        :maxdepth: 2
 
        packet
+       format
        api
        examples
 
