@@ -2,6 +2,7 @@
 """
 import struct
 
+FIXLENGTH = [b'VERS', b'MPL3']
 
 ################################################################################
 # Exceptions:
@@ -43,10 +44,10 @@ def decode(buff):
     # Don't recognize it. Skip it but make a record that we tried to unpack
     if message_cls is None:
         # Debug
+        print(printable(fourcc), length)
         #print("Skipped unknown header!", fourcc)
         return HEADER.size + length, (printable(fourcc), {'timestamp': timestamp})
 
-    # Yay! We know about this type, lets unpack it
     unpacked = message_cls.decode(buff[HEADER.size:HEADER.size+length])
     return HEADER.size + length, (printable(fourcc), dict({'timestamp': timestamp}, **unpacked))
 
@@ -95,6 +96,11 @@ class Head(object):
 
         # recreate timestamp from 6 bytes
         timestamp = timestamp_hi << 32 | timestamp_lo
+
+            # FIX special ones
+        if fourcc in FIXLENGTH:
+            message_cls = MESSAGES.get(printable(fourcc))
+            length = message_cls.size
 
         return fourcc, timestamp, length
 
@@ -344,19 +350,19 @@ Message({
     'size': "Fixed",
     'endianness': '!',
     'members': [
-        {'key': "Temperature",          'stype': "H", 'units': {'mks': "kelvin",    'scaleby': 0.1}},
-        {'key': "TS1Temperature",       'stype': "h", 'units': {'mks': "degree c",  'scaleby': 0.1}},
-        {'key': "TS2Temperature",       'stype': "h", 'units': {'mks': "degree c",  'scaleby': 0.1}},
-        {'key': "TempRange",            'stype': "H"},
-        {'key': "Voltage",              'stype': "H", 'units': {'mks': "volt",      'scaleby': 0.001}},
-        {'key': "Current",              'stype': "h", 'units': {'mks': "amp",       'scaleby': 0.001}},
-        {'key': "AverageCurrent",       'stype': "h", 'units': {'mks': "amp",       'scaleby': 0.001}},
-        {'key': "CellVoltage1",         'stype': "H", 'units': {'mks': "volt",      'scaleby': 0.001}},
-        {'key': "CellVoltage2",         'stype': "H", 'units': {'mks': "volt",      'scaleby': 0.001}},
-        {'key': "CellVoltage3",         'stype': "H", 'units': {'mks': "volt",      'scaleby': 0.001}},
-        {'key': "CellVoltage4",         'stype': "H", 'units': {'mks': "volt",      'scaleby': 0.001}},
-        {'key': "PackVoltage",          'stype': "H", 'units': {'mks': "volt",      'scaleby': 0.001}},
-        {'key': "AverageVoltage",       'stype': "H", 'units': {'mks': "volt",      'scaleby': 0.001}},
+        {'key': "Temperature",              'stype': "H", 'units': {'mks': "kelvin",    'scaleby': 0.1}},
+        {'key': "TS1Temperature",           'stype': "h", 'units': {'mks': "degree c",  'scaleby': 0.1}},
+        {'key': "TS2Temperature",           'stype': "h", 'units': {'mks': "degree c",  'scaleby': 0.1}},
+        {'key': "TempRange",                'stype': "H"},
+        {'key': "Voltage",                  'stype': "H", 'units': {'mks': "volt",      'scaleby': 0.001}},
+        {'key': "Current",                  'stype': "h", 'units': {'mks': "amp",       'scaleby': 0.001}},
+        {'key': "AverageCurrent",           'stype': "h", 'units': {'mks': "amp",       'scaleby': 0.001}},
+        {'key': "CellVoltage1",             'stype': "H", 'units': {'mks': "volt",      'scaleby': 0.001}},
+        {'key': "CellVoltage2",             'stype': "H", 'units': {'mks': "volt",      'scaleby': 0.001}},
+        {'key': "CellVoltage3",             'stype': "H", 'units': {'mks': "volt",      'scaleby': 0.001}},
+        {'key': "CellVoltage4",             'stype': "H", 'units': {'mks': "volt",      'scaleby': 0.001}},
+        {'key': "PackVoltage",              'stype': "H", 'units': {'mks': "volt",      'scaleby': 0.001}},
+        {'key': "AverageVoltage",           'stype': "H", 'units': {'mks': "volt",      'scaleby': 0.001}},
     ]
 }),
 Message({
@@ -365,14 +371,23 @@ Message({
     'size': "Fixed",
     'endianness': '!',
     'members': [
-        {'key': "Port1", 'stype': "H", 'units': {'mks': 'amp', 'scaleby': _rnhpscale}},
-        {'key': "Port2", 'stype': "H", 'units': {'mks': 'amp', 'scaleby': _rnhpscale}},
-        {'key': "Port3", 'stype': "H", 'units': {'mks': 'amp', 'scaleby': _rnhpscale}},
-        {'key': "Port4", 'stype': "H", 'units': {'mks': 'amp', 'scaleby': _rnhpscale}},
-        {'key': "Umbilical", 'stype': "H", 'units': {'mks': 'amp', 'scaleby': _rnhumbscale}},
-        {'key': "Port6", 'stype': "H", 'units': {'mks': 'amp', 'scaleby': _rnhpscale}},
-        {'key': "Port7", 'stype': "H", 'units': {'mks': 'amp', 'scaleby': _rnhpscale}},
-        {'key': "Port8", 'stype': "H", 'units': {'mks': 'amp', 'scaleby': _rnhpscale}},
+        {'key': "Port1",                        'stype': "H", 'units': {'mks': 'amp', 'scaleby': _rnhpscale}},
+        {'key': "Port2",                        'stype': "H", 'units': {'mks': 'amp', 'scaleby': _rnhpscale}},
+        {'key': "Port3",                        'stype': "H", 'units': {'mks': 'amp', 'scaleby': _rnhpscale}},
+        {'key': "Port4",                        'stype': "H", 'units': {'mks': 'amp', 'scaleby': _rnhpscale}},
+        {'key': "Umbilical",                    'stype': "H", 'units': {'mks': 'amp', 'scaleby': _rnhumbscale}},
+        {'key': "Port6",                        'stype': "H", 'units': {'mks': 'amp', 'scaleby': _rnhpscale}},
+        {'key': "Port7",                        'stype': "H", 'units': {'mks': 'amp', 'scaleby': _rnhpscale}},
+        {'key': "Port8",                        'stype': "H", 'units': {'mks': 'amp', 'scaleby': _rnhpscale}},
+    ]
+}),
+Message({
+    'name': "RNHUmbilical",
+    'fourcc': b'RNHU',
+    'size': "Fixed",
+    'endianness': '!',
+    'members': [
+        {'key': "Detect",                       'stype': "B"},
     ]
 }),
 Message({
@@ -407,6 +422,16 @@ Message({
         {'key': "IO_wlan0_Packets_Sent",        'stype': 'L'},
         {'key': "IO_wlan0_Packets_Recv",        'stype': 'L'},
         {'key': "Core_Temp",                    'stype': 'H'},
+    ]
+}),
+
+Message({
+    'name': "Version",
+    'fourcc': b'VERS',
+    'size': "Fixed",
+    'endianness': '!',
+    'members': [
+        {'key': "",   'stype': "17s" }
     ]
 }),
 Message({
@@ -598,6 +623,24 @@ Message({
         {'key': "Phase_9",              'stype': 'd', 'units': {'mks': "meter"}},
         {'key': "Phase_10",             'stype': 'd', 'units': {'mks': "meter"}},
         {'key': "Phase_11",             'stype': 'd', 'units': {'mks': "meter"}},
+    ]
+}),
+Message({
+    'name': "GPSProcessor",
+    'fourcc': b'GPS'+chr(97).encode(),
+    'size': "Fixed",
+    'endianness': '<',
+    'members': [
+        {'key': "CPU_Availible",        'stype': 'L', 'units': {'mks': "percent", 'scaleby': 450e-6}},
+        {'key': "Missed_Sub_Frames",    'stype': 'H'},
+        {'key': "Max_Subframe_Queued",  'stype': 'H'},
+        {'key': "Missed_Accum",         'stype': 'H'},
+        {'key': "Missed_Meas",          'stype': 'H'},
+        {'key': "spare1",               'stype': 'L'},
+        {'key': "spare2",               'stype': 'L'},
+        {'key': "spare3",               'stype': 'L'},
+        {'key': "spare4",               'stype': 'H'},
+        {'key': "spare5",               'stype': 'H'},
     ]
 }),
 Message({

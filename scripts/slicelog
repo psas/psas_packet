@@ -8,26 +8,31 @@ import codecs
 from psas_packet import io
 from psas_packet import messages
 
-PSAS = messages.MESSAGE_DICT
+SEQN = messages.MESSAGES['SEQN']
 HEAD = messages.HEADER
 
 def slicelog(begin, end, inlog, outlog):
     with io.BinFile(inlog) as log:
-        messages = log.read()
-        if begin is not None:
-            messages = itertools.dropwhile(lambda data: not ('SEQN' in data and data['SEQN']['Sequence'] >= begin))
-        if end is not None:
-            messages = itertools.takewhile(lambda data: not ('SEQN' in data and data['SEQN']['Sequence'] <= end))
 
-        for data in log.read():
-            for key in data:
-                # copy log
-                if key in PSAS:
-                    msg = PSAS[key]
-                    outlog.write(HEAD.encode(msg, data[key]['timestamp']))
-                    outlog.write(msg.encode(data[key]))
-        else:
-            print("No break")
+        messages = log.scan()
+
+        """
+        if begin is not None:
+            messages = itertools.dropwhile(lambda data: not (data[0] == SEQN.fourcc and SEQN.decode(data[1][messages.HEADER.size:])['Sequence'] >= begin))
+        if end is not None:
+            messages = itertools.takewhile(lambda data: not (data[0] == SEQN.fourcc and SEQN.decode(data[1][messages.HEADER.size:])['Sequence'] <= end))
+        """
+        seqn = 0
+        for fourcc, raw in messages:
+            if fourcc == SEQN.fourcc:
+               seqn = SEQN.decode(raw[HEAD.size:])['Sequence']
+               sys.stdout.write(" SEQN: %8d \r" % seqn)
+               sys.stdout.flush()
+            if seqn > begin:
+                outlog.write(raw)
+            
+            if seqn > end:
+                break
 
 
 if __name__ == '__main__':
