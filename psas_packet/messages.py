@@ -44,8 +44,9 @@ def decode(buff):
     # Don't recognize it. Skip it but make a record that we tried to unpack
     if message_cls is None:
         # Debug
-        print(printable(fourcc), length)
-        #print("Skipped unknown header!", fourcc)
+        print('')
+        print("Skipped unknown header: "+printable(fourcc))
+        print('')
         return HEADER.size + length, (printable(fourcc), {'timestamp': timestamp})
 
     unpacked = message_cls.decode(buff[HEADER.size:HEADER.size+length])

@@ -168,12 +168,23 @@ class BinFile(object):
         while buff != b'':
             try:
                 bytes_read, data = messages.decode(buff)
+
                 buff = buff[bytes_read:]
                 yield data
+
+                # check boundary
+                if len(buff) < 4:
+                    b = self.fh.read(1 << 20)  # 1 MB
+                    # Check that we didn't actually hit the end of the file
+                    if b == b'':
+                        print('boundary?')
+                        break
+                    buff += b
             except (messages.MessageSizeError):
                 b = self.fh.read(1 << 20)  # 1 MB
                 # Check that we didn't actually hit the end of the file
                 if b == b'':
+                    print('end?')
                     break
                 buff += b
 
@@ -209,5 +220,5 @@ def log2csv(f_in):
                     f_out.write(","+str(data[member['key']]))
                 f_out.write('\n')
 
-    for f_out in files:
-        f_out.close()
+    for fourcc, fh in files.items():
+        fh.close()
