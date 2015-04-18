@@ -15,6 +15,10 @@ test:
 test-all:
 	tox
 
+doc:
+	autodoc > docs/format.rst
+	cd docs; make html
+
 release: clean
 	python setup.py sdist upload
 

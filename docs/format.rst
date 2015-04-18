@@ -7,7 +7,7 @@ These are all the message types pre-defined in psas_packet.messages.MESSAGES
 ADIS
 ====
 
-ADIS16405
+Raw data from the `Analog Devices ADIS16405 9DOF IMU <http://www.analog.com/en/products/sensors/isensor-mems-inertial-measurement-units/adis16405.html>`_. Includes acceleration, gyroscope, magnetometer, and temperature data.
 
 **Format Description:**
 
@@ -46,7 +46,7 @@ ADIS16405
 FCFH
 ====
 
-FCFHealth
+No description
 
 **Format Description:**
 
@@ -113,7 +113,7 @@ FCFHealth
 GPS1
 ====
 
-GPSFix
+No description
 
 **Format Description:**
 
@@ -154,7 +154,7 @@ GPSFix
 GPS2
 ====
 
-GPSFixQuality
+No description
 
 **Format Description:**
 
@@ -181,7 +181,7 @@ GPSFixQuality
 GPS80
 =====
 
-GPSWAASMessage
+No description
 
 **Format Description:**
 
@@ -204,7 +204,7 @@ GPSWAASMessage
 GPS93
 =====
 
-GPSWAASEphemeris
+No description
 
 **Format Description:**
 
@@ -253,7 +253,7 @@ GPSWAASEphemeris
 GPS94
 =====
 
-GPSIonosphereUTC
+No description
 
 **Format Description:**
 
@@ -302,7 +302,7 @@ GPSIonosphereUTC
 GPS95
 =====
 
-GPSEphemeris
+No description
 
 **Format Description:**
 
@@ -329,7 +329,7 @@ GPSEphemeris
 GPS96
 =====
 
-GPSPsudorange
+No description
 
 **Format Description:**
 
@@ -446,7 +446,7 @@ GPSPsudorange
 GPS97
 =====
 
-GPSProcessor
+No description
 
 **Format Description:**
 
@@ -481,7 +481,7 @@ GPSProcessor
 GPS98
 =====
 
-GPSAlmanac
+No description
 
 **Format Description:**
 
@@ -504,7 +504,7 @@ GPSAlmanac
 GPS99
 =====
 
-GPSSatellite
+No description
 
 **Format Description:**
 
@@ -963,7 +963,7 @@ GPSSatellite
 LTCH
 ====
 
-LaunchTowerComputer
+No description
 
 **Format Description:**
 
@@ -1004,7 +1004,7 @@ LaunchTowerComputer
 MPL3
 ====
 
-MPL3115A2
+No description
 
 **Format Description:**
 
@@ -1023,7 +1023,7 @@ MPL3115A2
 RNHH
 ====
 
-RNHHealth
+No description
 
 **Format Description:**
 
@@ -1064,7 +1064,7 @@ RNHHealth
 RNHP
 ====
 
-RNHPower
+No description
 
 **Format Description:**
 
@@ -1095,7 +1095,7 @@ RNHPower
 RNHU
 ====
 
-RNHUmbilical
+No description
 
 **Format Description:**
 
@@ -1112,7 +1112,7 @@ RNHUmbilical
 ROLL
 ====
 
-RollServo
+No description
 
 **Format Description:**
 
@@ -1131,7 +1131,7 @@ RollServo
 SEQN
 ====
 
-SequenceNo
+No description
 
 **Format Description:**
 
@@ -1148,7 +1148,7 @@ SequenceNo
 VERS
 ====
 
-Version
+No description
 
 **Format Description:**
 

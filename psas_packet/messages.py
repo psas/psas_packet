@@ -118,6 +118,7 @@ class Message(object):
     """
 
     def __init__(self, definition):
+        self.definition = definition
         self.name = definition['name']
         self.fourcc = definition['fourcc']
 
@@ -297,14 +298,15 @@ Message({
 }),
 Message({
     'name': "ADIS16405",
+    'humans': "Raw data from the `Analog Devices ADIS16405 9DOF IMU <http://www.analog.com/en/products/sensors/isensor-mems-inertial-measurement-units/adis16405.html>`_. Includes acceleration, gyroscope, magnetometer, and temperature data.",
     'fourcc': b'ADIS',
     'size': "Fixed",
     'endianness': '!',
     'members': [
-        {'key': "VCC",     'stype': "H", 'units': {'mks': "volt",      'scaleby': 0.002418}},
-        {'key': "Gyro_X",  'stype': "h", 'units': {'mks': "hertz",     'scaleby': 0.05}},
-        {'key': "Gyro_Y",  'stype': "h", 'units': {'mks': "hertz",     'scaleby': 0.05}},
-        {'key': "Gyro_Z",  'stype': "h", 'units': {'mks': "hertz",     'scaleby': 0.05}},
+        {'key': "VCC",     'stype': "H", 'units': {'mks': "volt",      'scaleby': 0.002418}, 'humans': "Bus voltage"},
+        {'key': "Gyro_X",  'stype': "h", 'units': {'mks': "hertz",     'scaleby': 0.05},     'humans': "**X** axis value from rate-gyroscope"},
+        {'key': "Gyro_Y",  'stype': "h", 'units': {'mks': "hertz",     'scaleby': 0.05},    'humans': "**Y** axis value from rate-gyroscope"},
+        {'key': "Gyro_Z",  'stype': "h", 'units': {'mks': "hertz",     'scaleby': 0.05},    'humans': "**Z** axis value from rate-gyroscope"},
         {'key': "Acc_X",   'stype': "h", 'units': {'mks': "meter/s/s", 'scaleby': 0.00333 * g_0}},
         {'key': "Acc_Y",   'stype': "h", 'units': {'mks': "meter/s/s", 'scaleby': 0.00333 * g_0}},
         {'key': "Acc_Z",   'stype': "h", 'units': {'mks': "meter/s/s", 'scaleby': 0.00333 * g_0}},

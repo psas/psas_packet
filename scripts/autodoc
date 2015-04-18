@@ -13,7 +13,9 @@ These are all the message types pre-defined in psas_packet.messages.MESSAGES
 for fourcc, message in sorted(messages.MESSAGES.items()):
     print(fourcc)
     print('='*len(fourcc)+"\n")
-    print(message.name)
+
+    print(message.definition.get('humans', "No description"))
+    #print(message.name)
     print("\n**Format Description:**\n")
 
     field_size = len("Field")
