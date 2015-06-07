@@ -302,9 +302,9 @@ Message({
     'endianness': '!',
     'members': [
         {'key': "VCC",     'stype': "H", 'units': {'mks': "volt",      'scaleby': 0.002418}},
-        {'key': "Gyro_X",  'stype': "h", 'units': {'mks': "hertz",     'scaleby': 0.05 / 360}},
-        {'key': "Gyro_Y",  'stype': "h", 'units': {'mks': "hertz",     'scaleby': 0.05 / 360}},
-        {'key': "Gyro_Z",  'stype': "h", 'units': {'mks': "hertz",     'scaleby': 0.05 / 360}},
+        {'key': "Gyro_X",  'stype': "h", 'units': {'mks': "degrees/s", 'scaleby': 0.05}},
+        {'key': "Gyro_Y",  'stype': "h", 'units': {'mks': "degrees/s", 'scaleby': 0.05}},
+        {'key': "Gyro_Z",  'stype': "h", 'units': {'mks': "degrees/s", 'scaleby': 0.05}},
         {'key': "Acc_X",   'stype': "h", 'units': {'mks': "meter/s/s", 'scaleby': 0.00333 * g_0}},
         {'key': "Acc_Y",   'stype': "h", 'units': {'mks': "meter/s/s", 'scaleby': 0.00333 * g_0}},
         {'key': "Acc_Z",   'stype': "h", 'units': {'mks': "meter/s/s", 'scaleby': 0.00333 * g_0}},
