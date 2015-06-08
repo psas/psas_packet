@@ -5,10 +5,11 @@ try:
 except ImportError:
     from distutils.core import setup
 
+import psas_packet
 
 setup(
     name='psas_packet',
-    version='0.2.2',
+    version=psas_packet.__version__,
     description='serializer for PSAS data standards',
     long_description=open('README.rst').read(),
     author='Nathan Bergey',

@@ -316,6 +316,20 @@ Message({
     ]
 }),
 Message({
+    'name': "State",
+    'fourcc': b'VSTE',
+    'size': "Fixed",
+    'endianness': '<',
+    'members': [
+        {'key': "Time",         'stype': "d", 'units': {'mks': "seconds"}},
+        {'key': "Acc_up",       'stype': "d", 'units': {'mks': "meter /s/s"}},
+        {'key': "Vel_up",       'stype': "d", 'units': {'mks': "meter /s"}},
+        {'key': "Altitude",     'stype': "d", 'units': {'mks': "meter"}},
+        {'key': "Roll_Rate",    'stype': "d", 'units': {'mks': "degrees/s"}},
+        {'key': "Roll_Angle",   'stype': "d", 'units': {'mks': "degrees"}},
+    ]
+}),
+Message({
     'name': "MPL3115A2",
     'fourcc': b'MPL3',
     'size': "Fixed",
@@ -422,7 +436,7 @@ Message({
     'size': "Fixed",
     'endianness': '!',
     'members': [
-        {'key': "",   'stype': "17s" }
+        {'key': "vers",   'stype': "17s" }
     ]
 }),
 Message({
