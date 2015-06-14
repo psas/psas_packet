@@ -16,6 +16,9 @@ setup(
     url='http://psas-packet-serializer.readthedocs.org',
     packages=['psas_packet'],
     package_dir={'psas_packet': 'psas_packet'},
+    package_data = {
+        'psas_packet': ['definitions/*.yml'],
+    },
     include_package_data=True,
     install_requires=[],
     scripts=[

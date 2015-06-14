@@ -1,6 +1,14 @@
 """ PSAS Message definitions, encoding and decoding functions.
 """
+from __future__ import print_function
+from pkg_resources import resource_string, resource_listdir
 import struct
+from yaml import load
+try:
+    from yaml import CLoader as Loader, CDumper as Dumper
+except ImportError:
+    from yaml import Loader, Dumper
+
 
 FIXLENGTH = [b'VERS', b'MPL3']
 
@@ -286,6 +294,29 @@ _rnhumbscale = (3.3/2**12)
 ################################################################################
 # Types:
 ################################################################################
+
+_list = [
+    Message({
+        'name': "SequenceNo",
+        'fourcc': b'SEQN',
+        'size': "Fixed",
+        'endianness': '!',
+        'members': [
+            {'key': "Sequence", 'stype': "L"},
+        ]
+    })
+]
+
+for definition in resource_listdir('psas_packet', 'definitions'):
+    yamldef = None
+    try:
+        yamldef = load(resource_string(__name__, 'definitions/'+definition))
+    except:
+        pass
+    if yamldef:
+        _list.append(Message(yamldef))
+
+"""
 _list = [
 Message({
     'name': "SequenceNo",
@@ -294,27 +325,6 @@ Message({
     'endianness': '!',
     'members': [
         {'key': "Sequence", 'stype': "L"},
-    ]
-}),
-Message({
-    'name': "ADIS16405",
-    'humans': "Raw data from the `Analog Devices ADIS16405 9DOF IMU <http://www.analog.com/en/products/sensors/isensor-mems-inertial-measurement-units/adis16405.html>`_. Includes acceleration, gyroscope, magnetometer, and temperature data.",
-    'fourcc': b'ADIS',
-    'size': "Fixed",
-    'endianness': '!',
-    'members': [
-        {'key': "VCC",     'stype': "H", 'units': {'mks': "volt",      'scaleby': 0.002418}, 'humans': "Bus voltage"},
-        {'key': "Gyro_X",  'stype': "h", 'units': {'mks': "hertz",     'scaleby': 0.05},     'humans': "**X** axis value from rate-gyroscope"},
-        {'key': "Gyro_Y",  'stype': "h", 'units': {'mks': "hertz",     'scaleby': 0.05},    'humans': "**Y** axis value from rate-gyroscope"},
-        {'key': "Gyro_Z",  'stype': "h", 'units': {'mks': "hertz",     'scaleby': 0.05},    'humans': "**Z** axis value from rate-gyroscope"},
-        {'key': "Acc_X",   'stype': "h", 'units': {'mks': "meter/s/s", 'scaleby': 0.00333 * g_0}},
-        {'key': "Acc_Y",   'stype': "h", 'units': {'mks': "meter/s/s", 'scaleby': 0.00333 * g_0}},
-        {'key': "Acc_Z",   'stype': "h", 'units': {'mks': "meter/s/s", 'scaleby': 0.00333 * g_0}},
-        {'key': "Magn_X",  'stype': "h", 'units': {'mks': "tesla",     'scaleby': 5e-8}},
-        {'key': "Magn_Y",  'stype': "h", 'units': {'mks': "tesla",     'scaleby': 5e-8}},
-        {'key': "Magn_Z",  'stype': "h", 'units': {'mks': "tesla",     'scaleby': 5e-8}},
-        {'key': "Temp",    'stype': "h", 'units': {'mks': "degree c",  'scaleby': 0.14, 'bias': 25}},
-        {'key': "Aux_ADC", 'stype': "H", 'units': {'mks': "volt",      'scaleby': 806}},
     ]
 }),
 Message({
@@ -893,6 +903,8 @@ Message({
         {'key': "spare",                'stype': 'H'},
     ]
 })]
+
+"""
 
 MESSAGES = {printable(cls.fourcc): cls for cls in _list}
 HEADER = Head()

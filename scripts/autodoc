@@ -8,7 +8,7 @@ print("""===================
 Message Definitions
 ===================
 
-These are all the message types pre-defined in psas_packet.messages.MESSAGES
+These are all the message types pre-defined in :code:`psas_packet.messages.MESSAGES`
 """)
 for fourcc, message in sorted(messages.MESSAGES.items()):
     print(fourcc)
@@ -19,11 +19,16 @@ for fourcc, message in sorted(messages.MESSAGES.items()):
     print("\n**Format Description:**\n")
 
     field_size = len("Field")
+    desc_size = len("Description")
     type_size = len("Type")
     size_size = len("Size [Bytes]")
     for field in message.member_list:
         if len(str(field['key'])) > field_size:
             field_size = len(field['key'])
+
+        desc = field['humans']
+        if len(desc) > desc_size:
+            desc_size = len(desc)
 
         stype = field['stype']
         if 's' in stype:
@@ -32,6 +37,7 @@ for fourcc, message in sorted(messages.MESSAGES.items()):
             ctype = ctype + '[{0}]'.format(size)
         else:
             ctype = messages.CTYPES[stype]
+            ctype = ':code:`%s`' % ctype
         if len(str(ctype)) > type_size:
             type_size = len(str(ctype))
 
@@ -39,12 +45,12 @@ for fourcc, message in sorted(messages.MESSAGES.items()):
         if len(str(s.size)) > size_size:
             size_size = len(str(s.size))
 
-    fmt = "| %%%ds | %%%ds | %%%ds |" % (field_size, type_size, size_size)
+    fmt = "| %%%ds | %%%ds | %%%ds | %%%ds |" % (field_size, desc_size, type_size, size_size)
 
 
-    print('+'+'-'*(field_size+2)+'+'+'-'*(type_size+2)+'+'+'-'*(size_size+2)+'+')
-    print(fmt % ("Field", "Type", "Size [Bytes]"))
-    print('+'+'-'*(field_size+2)+'+'+'-'*(type_size+2)+'+'+'-'*(size_size+2)+'+')
+    print('+'+'-'*(field_size+2)+'+'+'-'*(desc_size+2)+'+'+'-'*(type_size+2)+'+'+'-'*(size_size+2)+'+')
+    print(fmt % ("Field", "Description", "Type", "Size [Bytes]"))
+    print('+'+'='*(field_size+2)+'+'+'='*(desc_size+2)+'+'+'='*(type_size+2)+'+'+'='*(size_size+2)+'+')
     for field in message.member_list:
         stype = field['stype']
         if 's' in stype:
@@ -53,9 +59,10 @@ for fourcc, message in sorted(messages.MESSAGES.items()):
             ctype = ctype + '[{0}]'.format(size)
         else:
             ctype = messages.CTYPES[stype]
+            ctype = ':code:`%s`' % ctype
         s = struct.Struct(field['stype'])
-        print(fmt % (field['key'], ctype, s.size))
-        print('+'+'-'*(field_size+2)+'+'+'-'*(type_size+2)+'+'+'-'*(size_size+2)+'+')
+        print(fmt % (field['key'], field['humans'], ctype, s.size))
+        print('+'+'-'*(field_size+2)+'+'+'-'*(desc_size+2)+'+'+'-'*(type_size+2)+'+'+'-'*(size_size+2)+'+')
     print('\n')
     print('--------------------------------------------------------------------------------')
     print('\n')

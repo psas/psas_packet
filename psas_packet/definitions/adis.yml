@@ -1,0 +1,59 @@
+# ADIS Message Format
+---
+
+name: ADIS16405
+fourcc: ADIS
+humans: "Raw data from the `Analog Devices ADIS16405 9DOF IMU <http://www.analog.com/en/products/sensors/isensor-mems-inertial-measurement-units/adis16405.html>`_. Includes acceleration, gyroscope, magnetometer, and temperature data."
+size: Fixed
+endianness: '!'
+members:
+  - key: VCC
+    humans: Bus voltage
+    stype: 'H'
+    units: { mks: Volt, scaleby: 0.002418 }
+  - key: Gyro_X
+    humans: "**X axis** value from rate-gyroscope"
+    stype: 'H'
+    units: { mks: "r/s", scaleby: 0.05 }
+  - key: Gyro_Y
+    humans: "**Y axis** value from rate-gyroscope"
+    stype: 'H'
+    units: { mks: "r/s", scaleby: 0.05 }
+  - key: Gyro_Z
+    humans: "**Z axis** value from rate-gyroscope"
+    stype: 'H'
+    units: { mks: "r/s", scaleby: 0.05 }
+  - key: Acc_X
+    humans: "**X axis** value from accelerometer"
+    stype: 'H'
+    units: { mks: "m/s/s", scaleby: 0.0326561445 }
+  - key: Acc_Y
+    humans: "**Y axis** value from accelerometer"
+    stype: 'H'
+    units: { mks: "m/s/s", scaleby: 0.0326561445 }
+  - key: Acc_Z
+    humans: "**Z axis** value from accelerometer"
+    stype: 'H'
+    units: { mks: "m/s/s", scaleby: 0.0326561445 }
+  - key: Magn_X
+    humans: "**X axis** value from magnetometer"
+    stype: 'H'
+    units: { mks: "tesla", scaleby: 5e-8 }
+  - key: Magn_Y
+    humans: "**Y axis** value from magnetometer"
+    stype: 'H'
+    units: { mks: "tesla", scaleby: 5e-8 }
+  - key: Magn_Z
+    humans: "**Z axis** value from magnetometer"
+    stype: 'H'
+    units: { mks: "tesla", scaleby: 5e-8 }
+  - key: Temp
+    humans: Unit temperature
+    stype: 'H'
+    units: { mks: "C",  scaleby: 0.14, bias: 25 }
+  - key: Aux_ADC
+    humans: Auxiliary ADC
+    stype: 'H'
+    units: { mks: Volt, scaleby: 0.002418 }
+
+...

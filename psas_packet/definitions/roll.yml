@@ -1,0 +1,17 @@
+# ROLL Message Format
+---
+
+name: RollServo
+fourcc: ROLL
+humans: "Roll servo positon"
+size: Fixed
+endianness: '!'
+members:
+  - key: Angle
+    humans: Fin angle
+    stype: 'd'
+  - key: Disable
+    humans: "Enable/disable flag"
+    stype: 'B'
+
+...
