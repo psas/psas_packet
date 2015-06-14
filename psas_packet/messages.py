@@ -286,23 +286,17 @@ CTYPES = {
     'd': 'double',
 }
 
-# ADC scale for power measuremnets
-_rnhpscale = (3.3/2**12) * (63000.0/69800.0)
-_rnhumbscale = (3.3/2**12)
 
-
-################################################################################
-# Types:
-################################################################################
-
+# Special SequenceNo type. This is part of psas_packet specification, not a type of data. 
 _list = [
     Message({
         'name': "SequenceNo",
+        'humans': "Sequence Number",
         'fourcc': b'SEQN',
         'size': "Fixed",
         'endianness': '!',
         'members': [
-            {'key': "Sequence", 'stype': "L"},
+            {'key': "Sequence", 'humans': "Sequence", 'stype': "L"},
         ]
     })
 ]
