@@ -1,0 +1,90 @@
+# FCF Message Format
+---
+
+messages:
+  - name: FCFHealth
+    fourcc: FCFH
+    humans: "Flight comptuer health"
+    size: Fixed
+    endianness: '!'
+    members:
+      - key: CPU_User
+        humans: "CPU User"
+        stype: 'f'
+      - key: CPU_System
+        humans: "CPU"
+        stype: 'f'
+      - key: CPU_Nice
+        humans: "CPU"
+        stype: 'f'
+      - key: CPU_IOWait
+        humans: "CPU"
+        stype: 'f'
+      - key: CPU_IRQ
+        humans: "CPU"
+        stype: 'f'
+      - key: CPU_SoftIRQ
+        humans: "CPU"
+        stype: 'f'
+      - key: RAM_Used
+        humans: "RAM"
+        stype: 'Q'
+      - key: RAM_Buffer
+        humans: "RAM"
+        stype: 'Q'
+      - key: RAM_Cached
+        humans: "RAM"
+        stype: 'Q'
+      - key: PID
+        humans: "Number of PIDs"
+        stype: 'H'
+      - key: Disk_Used
+        humans: "Disk"
+        stype: 'Q'
+      - key: Disk_Buffer
+        humans: "Disk"
+        stype: 'Q'
+      - key: Disk_Cached
+        humans: "Disk"
+        stype: 'Q'
+      - key: IO_lo_Bytes_Sent
+        humans: "IO localhost"
+        stype: 'I'
+      - key: IO_lo_Bytes_Recv
+        humans: "IO localhost"
+        stype: 'I'
+      - key: IO_lo_Packets_Sent
+        humans: "IO localhost"
+        stype: 'I'
+      - key: IO_lo_Packets_Recv
+        humans: "IO localhost"
+        stype: 'I'
+      - key: IO_eth0_Bytes_Sent
+        humans: "IO eth0"
+        stype: 'I'
+      - key: IO_eth0_Bytes_Recv
+        humans: "IO eth0"
+        stype: 'I'
+      - key: IO_eth0_Packets_Sent
+        humans: "IO eth0"
+        stype: 'I'
+      - key: IO_eth0_Packets_Recv
+        humans: "IO eth0"
+        stype: 'I'
+      - key: IO_wlan0_Bytes_Sent
+        humans: "IO wlan0"
+        stype: 'I'
+      - key: IO_wlan0_Bytes_Recv
+        humans: "IO wlan0"
+        stype: 'I'
+      - key: IO_wlan0_Packets_Sent
+        humans: "IO wlan0"
+        stype: 'I'
+      - key: IO_wlan0_Packets_Recv
+        humans: "IO wlan0"
+        stype: 'I'
+      - key: Core_Temp
+        humans: "Core Temp"
+        stype: 'H'
+
+...

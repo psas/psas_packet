@@ -1,0 +1,114 @@
+# Rocket Net Hub Message Formats
+---
+
+messages:
+
+  - name: RNHHealth
+    fourcc: RNHH
+    humans: "Battery and power information from the Rocket Net Hub"
+    size: Fixed
+    endianness: '!'
+    members:
+      - key: Temperature
+        humans: "Battery temp"
+        stype: 'H'
+        units: { mks: kelvin, scaleby: 0.1 }
+      - key: TS1Temperature
+        humans: "Battery temp"
+        stype: 'h'
+        units: { mks: c, scaleby: 0.1 }
+      - key: TS2Temperature
+        humans: "Battery temp"
+        stype: 'h'
+        units: { mks: c, scaleby: 0.1 }
+      - key: TempRange
+        humans: "Battery temp"
+        stype: 'H'
+      - key: Voltage
+        humans: "Voltage"
+        stype: 'H'
+        units: { mks: volt, scaleby: 0.001 }
+      - key: Current
+        humans: "Current"
+        stype: 'h'
+        units: { mks: amp, scaleby: 0.001 }
+      - key: AverageCurrent
+        humans: "Average Current"
+        stype: 'h'
+        units: { mks: amp, scaleby: 0.001 }
+      - key: CellVoltage1
+        humans: "Battery Cell 1 Voltage"
+        stype: 'H'
+        units: { mks: volt, scaleby: 0.001 }
+      - key: CellVoltage2
+        humans: "Battery Cell 2 Voltage"
+        stype: 'H'
+        units: { mks: volt, scaleby: 0.001 }
+      - key: CellVoltage3
+        humans: "Battery Cell 3 Voltage"
+        stype: 'H'
+        units: { mks: volt, scaleby: 0.001 }
+      - key: CellVoltage4
+        humans: "Battery Cell 4 Voltage"
+        stype: 'H'
+        units: { mks: volt, scaleby: 0.001 }
+      - key: PackVoltage
+        humans: "Battery Pack Voltage"
+        stype: 'H'
+        units: { mks: volt, scaleby: 0.001 }
+      - key: AverageVoltage
+        humans: "Battery Pack Average Voltage"
+        stype: 'H'
+        units: { mks: volt, scaleby: 0.001 }
+
+  - name: RNHPower
+    fourcc: RNHP
+    humans: "Port power usage"
+    size: Fixed
+    endianness: '!'
+    members:
+      - key: Port1
+        humans: "Port 1"
+        stype: 'H'
+        units: { mks: amp, scaleby: 0.00072717529 }
+      - key: Port2
+        humans: "Port 2"
+        stype: 'H'
+        units: { mks: amp, scaleby: 0.00072717529 }
+      - key: Port3
+        humans: "Port 3"
+        stype: 'H'
+        units: { mks: amp, scaleby: 0.00072717529 }
+      - key: Port4
+        humans: "Port 4"
+        stype: 'H'
+        units: { mks: amp, scaleby: 0.00072717529 }
+      - key: Umbilical
+        humans: "Umbilical"
+        stype: 'H'
+        units: { mks: amp, scaleby: 0.00080566406 }
+      - key: Port6
+        humans: "Port 6"
+        stype: 'H'
+        units: { mks: amp, scaleby: 0.00072717529 }
+      - key: Port7
+        humans: "Port 7"
+        stype: 'H'
+        units: { mks: amp, scaleby: 0.00072717529 }
+      - key: Port8
+        humans: "Port 8"
+        stype: 'H'
+        units: { mks: amp, scaleby: 0.00072717529 }
+
+
+  - name: RNHUmbilical
+    fourcc: RNHU
+    humans: "Umbiilical Detect"
+    size: Fixed
+    endianness: '!'
+    members:
+      - key: Detect
+        humans: "Detect"
+        stype: 'B'
+
+...

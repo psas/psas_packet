@@ -278,6 +278,8 @@ CTYPES = {
     'b': 'int8_t',
     'H': 'uint16_t',
     'h': 'int16_t',
+    'I': 'uint32_t',
+    'i': 'int32_t',
     'L': 'uint32_t',
     'l': 'int32_t',
     'Q': 'uint64_t',
@@ -296,7 +298,7 @@ _list = [
         'size': "Fixed",
         'endianness': '!',
         'members': [
-            {'key': "Sequence", 'humans': "Sequence", 'stype': "L"},
+            {'key': "Sequence", 'humans': "Sequence", 'stype': "I"},
         ]
     })
 ]
@@ -308,19 +310,12 @@ for definition in resource_listdir('psas_packet', 'definitions'):
     except:
         pass
     if yamldef:
-        _list.append(Message(yamldef))
+        for message in yamldef['messages']:
+            _list.append(Message(message))
+
 
 """
 _list = [
-Message({
-    'name': "SequenceNo",
-    'fourcc': b'SEQN',
-    'size': "Fixed",
-    'endianness': '!',
-    'members': [
-        {'key': "Sequence", 'stype': "L"},
-    ]
-}),
 Message({
     'name': "MPL3115A2",
     'fourcc': b'MPL3',
@@ -331,97 +326,6 @@ Message({
         {'key': "Temp",                 'stype': "h", 'units': {'mks': "degree c", 'scaleby': 1/256}},
     ]
 }),
-Message({
-    'name': "RollServo",
-    'fourcc': b'ROLL',
-    'size': "Fixed",
-    'endianness': '!',
-    'members': [
-        {'key': "Angle",                'stype': "d"},
-        {'key': "Disable",              'stype': "B"},
-    ]
-}),
-Message({
-    'name': "RNHHealth",
-    'fourcc': b'RNHH',
-    'size': "Fixed",
-    'endianness': '!',
-    'members': [
-        {'key': "Temperature",              'stype': "H", 'units': {'mks': "kelvin",    'scaleby': 0.1}},
-        {'key': "TS1Temperature",           'stype': "h", 'units': {'mks': "degree c",  'scaleby': 0.1}},
-        {'key': "TS2Temperature",           'stype': "h", 'units': {'mks': "degree c",  'scaleby': 0.1}},
-        {'key': "TempRange",                'stype': "H"},
-        {'key': "Voltage",                  'stype': "H", 'units': {'mks': "volt",      'scaleby': 0.001}},
-        {'key': "Current",                  'stype': "h", 'units': {'mks': "amp",       'scaleby': 0.001}},
-        {'key': "AverageCurrent",           'stype': "h", 'units': {'mks': "amp",       'scaleby': 0.001}},
-        {'key': "CellVoltage1",             'stype': "H", 'units': {'mks': "volt",      'scaleby': 0.001}},
-        {'key': "CellVoltage2",             'stype': "H", 'units': {'mks': "volt",      'scaleby': 0.001}},
-        {'key': "CellVoltage3",             'stype': "H", 'units': {'mks': "volt",      'scaleby': 0.001}},
-        {'key': "CellVoltage4",             'stype': "H", 'units': {'mks': "volt",      'scaleby': 0.001}},
-        {'key': "PackVoltage",              'stype': "H", 'units': {'mks': "volt",      'scaleby': 0.001}},
-        {'key': "AverageVoltage",           'stype': "H", 'units': {'mks': "volt",      'scaleby': 0.001}},
-    ]
-}),
-Message({
-    'name': "RNHPower",
-    'fourcc': b'RNHP',
-    'size': "Fixed",
-    'endianness': '!',
-    'members': [
-        {'key': "Port1",                        'stype': "H", 'units': {'mks': 'amp', 'scaleby': _rnhpscale}},
-        {'key': "Port2",                        'stype': "H", 'units': {'mks': 'amp', 'scaleby': _rnhpscale}},
-        {'key': "Port3",                        'stype': "H", 'units': {'mks': 'amp', 'scaleby': _rnhpscale}},
-        {'key': "Port4",                        'stype': "H", 'units': {'mks': 'amp', 'scaleby': _rnhpscale}},
-        {'key': "Umbilical",                    'stype': "H", 'units': {'mks': 'amp', 'scaleby': _rnhumbscale}},
-        {'key': "Port6",                        'stype': "H", 'units': {'mks': 'amp', 'scaleby': _rnhpscale}},
-        {'key': "Port7",                        'stype': "H", 'units': {'mks': 'amp', 'scaleby': _rnhpscale}},
-        {'key': "Port8",                        'stype': "H", 'units': {'mks': 'amp', 'scaleby': _rnhpscale}},
-    ]
-}),
-Message({
-    'name': "RNHUmbilical",
-    'fourcc': b'RNHU',
-    'size': "Fixed",
-    'endianness': '!',
-    'members': [
-        {'key': "Detect",                       'stype': "B"},
-    ]
-}),
-Message({
-    'name': "FCFHealth",
-    'fourcc': b'FCFH',
-    'size': "Fixed",
-    'endianness': '!',
-    'members': [
-        {'key': "CPU_User",                     'stype': 'f'},
-        {'key': "CPU_System",                   'stype': 'f'},
-        {'key': "CPU_Nice",                     'stype': 'f'},
-        {'key': "CPU_IOWait",                   'stype': 'f'},
-        {'key': "CPU_IRQ",                      'stype': 'f'},
-        {'key': "CPU_SoftIRQ",                  'stype': 'f'},
-        {'key': "RAM_Used",                     'stype': 'Q'},
-        {'key': "RAM_Buffer",                   'stype': 'Q'},
-        {'key': "RAM_Cached",                   'stype': 'Q'},
-        {'key': "PID",                          'stype': 'H'},
-        {'key': "Disk_Used",                    'stype': 'Q'},
-        {'key': "Disk_Read",                    'stype': 'Q'},
-        {'key': "Disk_Write",                   'stype': 'Q'},
-        {'key': "IO_lo_Bytes_Sent",             'stype': 'L'},
-        {'key': "IO_lo_Bytes_Recv",             'stype': 'L'},
-        {'key': "IO_lo_Packets_Sent",           'stype': 'L'},
-        {'key': "IO_lo_Packets_Recv",           'stype': 'L'},
-        {'key': "IO_eth0_Bytes_Sent",           'stype': 'L'},
-        {'key': "IO_eth0_Bytes_Recv",           'stype': 'L'},
-        {'key': "IO_eth0_Packets_Sent",         'stype': 'L'},
-        {'key': "IO_eth0_Packets_Recv",         'stype': 'L'},
-        {'key': "IO_wlan0_Bytes_Sent",          'stype': 'L'},
-        {'key': "IO_wlan0_Bytes_Recv",          'stype': 'L'},
-        {'key': "IO_wlan0_Packets_Sent",        'stype': 'L'},
-        {'key': "IO_wlan0_Packets_Recv",        'stype': 'L'},
-        {'key': "Core_Temp",                    'stype': 'H'},
-    ]
-}),
-
 Message({
     'name': "Version",
     'fourcc': b'VERS',
