@@ -430,7 +430,7 @@ Message({
     ]
 }),
 Message({
-    'name': "Venus8NavigationData",
+    'name': "Venus8Navigation",
     'fourcc': b'V8A8',
     'size': "Fixed",
     'endianness': '!',
