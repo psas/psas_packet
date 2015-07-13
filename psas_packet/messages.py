@@ -244,7 +244,7 @@ def printable(s):
     print as GPS94, not GPS^.
     """
 
-    if b'GPS' in s:
+    if s.startswith(b'GPS'):
         char = s[-1]
         if type(char) is int:
             s = 'GPS' + str(char)
