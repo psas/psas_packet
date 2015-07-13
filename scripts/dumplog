@@ -1,0 +1,10 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+from __future__ import print_function
+import json
+from psas_packet import io, messages
+import sys
+
+with io.BinFile(sys.stdin) as log:
+    for message in log.read():
+        print(json.dumps(message, sort_keys=True))
