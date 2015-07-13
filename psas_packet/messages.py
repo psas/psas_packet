@@ -2,7 +2,7 @@
 """
 import struct
 
-FIXLENGTH = [b'VERS', b'MPL3']
+FIXLENGTH = [b'MPL3']
 
 ################################################################################
 # Exceptions:
@@ -454,15 +454,6 @@ Message({
         {'key': "ECEF_VX",              'stype': "l" ,  'units': {'mks': "m/s",    "scaleby": 1e-2}},
         {'key': "ECEF_VY",              'stype': "l" ,  'units': {'mks': "m/s",    "scaleby": 1e-2}},
         {'key': "ECEF_VZ",              'stype': "l" ,  'units': {'mks': "m/s",    "scaleby": 1e-2}},
-    ]
-}),
-Message({
-    'name': "Version",
-    'fourcc': b'VERS',
-    'size': "Fixed",
-    'endianness': '!',
-    'members': [
-        {'key': "vers",   'stype': "17s" }
     ]
 }),
 Message({
