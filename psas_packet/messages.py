@@ -41,15 +41,14 @@ def decode(buff):
     # figure out what type it is based on FOURCC, and get that message class
     message_cls = MESSAGES.get(printable(fourcc), None)
 
+    body = buff[HEADER.size:HEADER.size+length]
+
     # Don't recognize it. Skip it but make a record that we tried to unpack
     if message_cls is None:
-        # Debug
-        print('')
-        print("Skipped unknown header: "+printable(fourcc))
-        print('')
-        return HEADER.size + length, (printable(fourcc), {'timestamp': timestamp})
+        fmt_body = ' '.join('{:02X}'.format(ord(b)) for b in body)
+        return HEADER.size + length, (printable(fourcc), {'timestamp': timestamp, 'raw': fmt_body})
 
-    unpacked = message_cls.decode(buff[HEADER.size:HEADER.size+length])
+    unpacked = message_cls.decode(body)
     return HEADER.size + length, (printable(fourcc), dict({'timestamp': timestamp}, **unpacked))
 
 
