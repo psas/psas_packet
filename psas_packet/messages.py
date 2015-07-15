@@ -295,6 +295,17 @@ Message({
     ]
 }),
 Message({
+    'name': "SequenceError",
+    'fourcc': b'SEQE',
+    'size': "Fixed",
+    'endianness': '!',
+    'members': [
+        {'key': "Port",     'stype': "H"},
+        {'key': "Expected", 'stype': "L"},
+        {'key': "Received", 'stype': "L"},
+    ]
+}),
+Message({
     'name': "ADIS16405",
     'fourcc': b'ADIS',
     'size': "Fixed",
