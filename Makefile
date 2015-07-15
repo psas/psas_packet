@@ -1,4 +1,9 @@
+CFLAGS = -g -Wall
+
+all: binary-slice
+
 clean: clean-build clean-pyc
+	-rm -f binary-slice
 
 clean-build:
 	rm -fr build/
