@@ -122,71 +122,25 @@ class BinFile(object):
         """Only unpack sequence numbers and return raw data inbetween
         """
 
-        # Read a chunk of file
-        buff = self.fh.read(1 << 20)  # 1 MB
+        while True:
+            header = self.fh.read(HEADER.size)
 
-        # As long as we have something to look at
-        while buff != b'':
             try:
-                fourcc, timestamp, length = HEADER.decode(buff[:HEADER.size])
-                bytes_read = HEADER.size + length
+                fourcc, timestamp, length = HEADER.decode(header)
+            except messages.MessageSizeError:
+                # ignore any trailing message that's too short for a header
+                return
 
-                if len(buff) < bytes_read:
-                    b = self.fh.read(1 << 20)  # 1 MB
-                    # Check that we didn't actually hit the end of the file
-                    if b == b'':
-                        break
-                    buff += b
-
-                raw = buff[:bytes_read]
-                yield fourcc, raw
-
-                buff = buff[bytes_read:]
-                # check boundary
-                if len(buff) < 4:
-                    b = self.fh.read(1 << 20)  # 1 MB
-                    # Check that we didn't actually hit the end of the file
-                    if b == b'':
-                        break
-                    buff += b
-            except (messages.MessageSizeError):
-                b = self.fh.read(1 << 20)  # 1 MB
-                # Check that we didn't actually hit the end of the file
-                if b == b'':
-                    break
-                buff += b
-
+            raw = self.fh.read(length)
+            yield fourcc, (header + raw)
 
     def read(self):
         """Read the file and return data inside it
         """
 
-        # Read a chunk of file
-        buff = self.fh.read(1 << 20)  # 1 MB
-
-        # As long as we have something to look at
-        while buff != b'':
-            try:
-                bytes_read, data = messages.decode(buff)
-
-                buff = buff[bytes_read:]
-                yield data
-
-                # check boundary
-                if len(buff) < 4:
-                    b = self.fh.read(1 << 20)  # 1 MB
-                    # Check that we didn't actually hit the end of the file
-                    if b == b'':
-                        print('boundary?')
-                        break
-                    buff += b
-            except (messages.MessageSizeError):
-                b = self.fh.read(1 << 20)  # 1 MB
-                # Check that we didn't actually hit the end of the file
-                if b == b'':
-                    print('end?')
-                    break
-                buff += b
+        for _fourcc, raw in self.scan():
+            _bytes_read, data = messages.decode(raw)
+            yield data
 
 
 def log2csv(f_in):
