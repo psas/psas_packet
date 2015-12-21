@@ -1,13 +1,13 @@
 PSAS Packet Serializer
 ======================
 
-.. image:: https://badge.fury.io/py/psas_packet.png
+.. image:: https://badge.fury.io/py/psas_packet.svg
     :target: http://badge.fury.io/py/psas_packet
 
-.. image:: https://travis-ci.org/psas/psas_packet.png
+.. image:: https://travis-ci.org/psas/psas_packet.svg
     :target: https://travis-ci.org/psas/psas_packet
 
-.. image:: https://coveralls.io/repos/psas/psas_packet/badge.png?branch=master
+.. image:: https://coveralls.io/repos/psas/psas_packet/badge.svg?branch=master
     :target: https://coveralls.io/r/psas/psas_packet?branch=master
 
 
