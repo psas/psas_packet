@@ -23,7 +23,7 @@ class TestIO(unittest.TestCase):
     def test_log2csv(self):
         # smoke test
         try:
-            io.log2csv("tests/data/simple_log.json")
+            io.log2csv("tests/data/simple_logfile")
         except:
             self.fail("log2csv exception")
 
