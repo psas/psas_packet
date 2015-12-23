@@ -1,0 +1,28 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+from __future__ import print_function
+import itertools
+from psas_packet import io, messages
+import sys
+
+HEAD = messages.HEADER
+SEQE = messages.MESSAGES['SEQE']
+
+target_port = 35050
+target_fourcc = 'JGPS'
+time_zero = 117853569585227
+
+indexes = itertools.count(1)
+output = None
+with io.BinFile(sys.stdin) as log:
+    for fourcc, raw in log.scan():
+        if fourcc == SEQE.fourcc:
+            length, (fourcc, pkt) = messages.decode(raw)
+            if pkt['Port'] == target_port:
+                if output:
+                    output.close()
+                name = '{0}-{1:03d}@{2}'.format(target_fourcc, indexes.next(), (pkt['timestamp'] - time_zero) / 1e9)
+                print('opening {0}'.format(name))
+                output = open(name, 'w')
+        elif fourcc == target_fourcc:
+            output.write(raw[HEAD.size:])
