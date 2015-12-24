@@ -360,6 +360,16 @@ Message({
     ]
 }),
 Message({
+    'name': "BMP180Pressure",
+    'fourcc': b'BMP1',
+    'size': "Fixed",
+    'endianness': '<',
+    'members': [
+        {'key': "Pressure",             'stype': "L"},
+        {'key': "Temperature",          'stype': "H"},
+    ]
+}),
+Message({
     'name': "RNHHealth",
     'fourcc': b'RNHH',
     'size': "Fixed",
