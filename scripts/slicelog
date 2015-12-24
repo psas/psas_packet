@@ -36,7 +36,7 @@ def slicelog(begin, end, inlog, outlog):
 
 
 if __name__ == '__main__':
-    parser = argparse.ArgumentParser(prog='log2csv')
+    parser = argparse.ArgumentParser(prog='slicelog')
     parser.add_argument('logfile', type=argparse.FileType('rb'), help="Log file to read")
     parser.add_argument('slice', type=str, help="slice")
     parser.add_argument('-o', '--output', type=argparse.FileType('wb'), default=getattr(sys.stdout, 'buffer', sys.stdout), help="Output File", required=False)
